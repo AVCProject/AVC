@@ -114,7 +114,6 @@
 		12FDB0AD13F420E0002E3C45 /* kinect_maps.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = kinect_maps.cpp; sourceTree = "<group>"; };
 		12FDB0AE13F420E0002E3C45 /* multicascadeclassifier.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multicascadeclassifier.cpp; sourceTree = "<group>"; };
 		12FDB0AF13F420E0002E3C45 /* peopledetect.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = peopledetect.cpp; sourceTree = "<group>"; };
-		4D4CDBCC0C0630060001A8A2 /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
 		4D7DBE570C04A8FF00D8835D /* AVC.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AVC.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4D7DBE590C04A8FF00D8835D /* AVC-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "AVC-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -149,7 +148,6 @@
 			isa = PBXGroup;
 			children = (
 				12E3C63D1362F72F00DEB2E9 /* lib */,
-				4D4CDBCC0C0630060001A8A2 /* README.txt */,
 				08FB7795FE84155DC02AAC07 /* Source */,
 				4DBF872C0C0572BC00880673 /* Resources */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
