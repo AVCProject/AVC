@@ -10,6 +10,7 @@
 #include <iostream>
 #include <boost/thread.hpp>
 
+//MOD:현재 맥에서만 동작하기 때문에 막아뒀음.
 
 
 AVCNetwork::AVCNetwork()
@@ -28,12 +29,13 @@ AVCNetwork::~AVCNetwork()
 
 bool AVCNetwork::init(unsigned short port)
 {	
+	/*
 	struct sockaddr_in serverAddr;
 	
 	serverSocket=socket(PF_INET, SOCK_STREAM, 0);   
 	if(serverSocket==-1)
 		error_handling("socket() error");
-	
+	p
 	memset(&serverAddr, 0, sizeof(serverAddr));
 	serverAddr.sin_family=AF_INET;
 	serverAddr.sin_addr.s_addr=htonl(INADDR_ANY);
@@ -53,15 +55,17 @@ bool AVCNetwork::init(unsigned short port)
 		error_handling("listen() error");
     
     
-	
+	*/
     return true;
 	
 }
 void AVCNetwork::workerThread()
 {
     // 연결 받기 기다리는 루프
+	/*
 	while (1)
 	{
+		
 		printf("Unit Sizes:float%lu,int%lu,time_t%lu,",sizeof(float),sizeof(int),sizeof(time_t));
 		printf("Data Size:%lu\n",sizeof(AVCData));
         
@@ -130,6 +134,7 @@ void AVCNetwork::workerThread()
 	}
     
     close(serverSocket);
+	*/
 }
 void AVCNetwork::start()
 {
@@ -143,6 +148,7 @@ void AVCNetwork::stop()
 void AVCNetwork::convertDataToNetworkOrder(AVCData& aData)
 {
     //time(&data.timeStamp);
+	/*
     aData.marginLeft = htohFloat(aData.marginLeft);
     aData.marginRight = htohFloat(aData.marginRight);    
     aData.laneValidity =htonl(aData.laneValidity);
@@ -152,6 +158,7 @@ void AVCNetwork::convertDataToNetworkOrder(AVCData& aData)
     aData.angleRight = htohFloat(aData.angleRight);
 
     aData.trafficSign = htonl(aData.trafficSign);
+	*/
 }
 void AVCNetwork::addToQueue(AVCData aData)
 {
@@ -161,10 +168,13 @@ void AVCNetwork::addToQueue(AVCData aData)
 // float형을 네트워크 바이트 오더링으로 변경
 float AVCNetwork::htohFloat(float fVal)
 {
+	/*
 	unsigned long *puifVal = (unsigned long *)&fVal;    // float를 unsigned long 캐스팅.
 	
 	*puifVal = ntohl(*puifVal);	// ntohl(htonl) 함수 이용
+	*/
 	return fVal;
+	
 }
 void AVCNetwork::error_handling(const char *message)
 {

@@ -7,16 +7,26 @@
  *
  */
 
+#ifdef MAC_OS_X_VERSION_10_6
+
+#else
+	#include "opencv2/gpu/gpu.hpp"
+#endif
+
+#include "stdafx.h"
 #include "opencv2/opencv.hpp"
 #include <cassert>
 #include <iostream>
 #include "LaneDetector.h"
 
 #include "AVCNetwork.h"
-#include "boost/thread.hpp"
 #include "AVCTimeProfiler.h"
 #include "RoadAreaDetector.h"
 #include "PedDetector.h"
+
+
+
+
 
 #ifdef MAC_OS_X_VERSION_10_6
 string getFilePathFromBundle(const char* aName);
@@ -25,11 +35,15 @@ string getFilePathFromBundle(const char* aName);
 
 void getBirdEyeView(Mat& src);
 
+#ifdef MAC_OS_X_VERSION_10_6
 int main (int argc, char * const argv[]) 
+#else
+int _tmain(int argc, _TCHAR* argv[])
+#endif
 {
 	bool isPaused = false;
-	bool isNetworkOn = true;
-    bool isSourceLive = false;
+	bool isNetworkOn = false;
+    bool isSourceLive = true;
 	//char filePath[] = "curve_test.avi";
     char filePath[] = "ped1.avi";
     
@@ -95,7 +109,17 @@ int main (int argc, char * const argv[])
 		{
 			imshow("Original", current_frame);
 			
-            
+            /*
+			gpu test
+			cv::Mat src_host;
+			cvtColor(current_frame , src_host, CV_RGB2GRAY );
+			cv::gpu::GpuMat dst, src;
+			src.upload(src_host);
+			cv::gpu::threshold(src, dst, 128.0, 255.0, CV_THRESH_BINARY);
+
+			src_host = dst;
+			imshow("gpu",src_host);
+			*/
             // 버드아이뷰
             //getBirdEyeView(current_frame);
 			//laneDetector->runModule(current_frame, cv::Rect(232,0,261,current_frame.rows));
@@ -106,7 +130,7 @@ int main (int argc, char * const argv[])
             //laneDetector->runModule(current_frame, cv::Rect(0,310,current_frame.cols,current_frame.rows-310));
             
             //roadAreaDetector->runModule(current_frame, cv::Rect(0,0,1,1));
-            pedDetector->runModule(current_frame, cv::Rect(320,170,current_frame.cols-320,current_frame.rows-170-100));            
+            //pedDetector->runModule(current_frame, cv::Rect(320,170,current_frame.cols-320,current_frame.rows-170-100));            
             AVCTimeProfiler::end();
             AVCTimeProfiler::print();
             
@@ -118,8 +142,8 @@ int main (int argc, char * const argv[])
                 avcData.laneValidity =5;   
                 
                 avcData.steering = 0.5;
-				avcData.angleLeft = laneDetector->angleLeft;
-				avcData.angleRight = laneDetector->angleRight;
+				//avcData.angleLeft = laneDetector->angleLeft;
+				//avcData.angleRight = laneDetector->angleRight;
                 avcData.trafficSign = 1;
             
 
@@ -149,7 +173,7 @@ int main (int argc, char * const argv[])
 
     delete laneDetector;
 	
-	
+	return 0;
 }
 //void getBirdEyeView(Mat& src, CV_OUT Mat& dst)
 void getBirdEyeView(Mat& src)

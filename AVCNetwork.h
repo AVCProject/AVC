@@ -14,10 +14,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef MAC_OS_X_VERSION_10_6
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <time.h>
+#else
+//#include <windows.h>
+#include <winsock2.h>
+#endif
+
+
 
 #include <queue>
 

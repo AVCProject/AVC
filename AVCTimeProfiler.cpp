@@ -10,7 +10,7 @@
 #define AVC_AVCTimeProfiler_h
 
 #include "AVCTimeProfiler.h"
-#include <time.h>
+
 
 #include <math.h>
 
@@ -19,15 +19,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
-//MAC
-#if 1
+
+#ifdef MAC_OS_X_VERSION_10_6
     #include <sys/time.h>
+#else
+	#include <time.h>
 #endif
 
-//WINDOW
-#if 0
-    // Structure timeval has define in winsock.h, include windows.h for it.
-#include <Windows.h>
 using namespace std;
 
 struct timezone
@@ -39,15 +37,19 @@ struct timezone
 //윈도우용 함수
 //int CC_DLL gettimeofday(struct timeval *, struct timezone *);
 
-#endif  // CC_PLATFORM_WIN32
 
 
 int AVCTimeProfiler::getCurrentTime(AVCTime *tp)
 {
     if (tp)
     {
-        //맥 전용함수?
+#ifdef MAC_OS_X_VERSION_10_6
+		//맥 전용함수?
         gettimeofday((struct timeval *)tp,  0);
+#else
+	
+#endif
+        
     }
     return 0;
 }

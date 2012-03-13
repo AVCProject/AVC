@@ -17,7 +17,7 @@ PedDetector::PedDetector(const char* aWindowName)
     
    
     //hog.setSVMDetector(HOGDescriptor::getDefaultPeopleDetector());
-    hog.setSVMDetector(HOGDescriptor::getPeopleDetector48x96());
+    //hog.setSVMDetector(HOGDescriptor::getPeopleDetector48x96());
    
     namedWindow( aWindowName, 0 );
     
