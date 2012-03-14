@@ -45,7 +45,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	bool isNetworkOn = false;
     bool isSourceLive = true;
 	//char filePath[] = "curve_test.avi";
-    char filePath[] = "ped1.avi";
+    char filePath[] = "peaasd1.avi";
     
     
 	AVCNetwork *netModule = NULL;
