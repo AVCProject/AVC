@@ -43,9 +43,9 @@ int _tmain(int argc, _TCHAR* argv[])
 {
 	bool isPaused = false;
 	bool isNetworkOn = false;
-    bool isSourceLive = true;
+    bool isSourceLive = false;
 	//char filePath[] = "curve_test.avi";
-    char filePath[] = "peaasd1.avi";
+    char filePath[] = "C:\\AVC_Output\\AVC_Data\\ped1.avi";
     
     
 	AVCNetwork *netModule = NULL;
