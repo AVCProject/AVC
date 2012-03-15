@@ -48,6 +48,7 @@
     <LinkIncremental>false</LinkIncremental>
     <OutDir>C:\AVC_Output</OutDir>
     <IntDir>C:\AVC_Output\Intermediate</IntDir>
+    <IncludePath>$(SolutionDir)AVC;$(SolutionDir)boost;$(SolutionDir)opencv\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -61,7 +62,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opencv_calib3d231.lib;opencv_contrib231.lib;opencv_core231.lib;opencv_features2d231.lib;opencv_flann231.lib;opencv_gpu231.lib;opencv_highgui231.lib;opencv_imgproc231.lib;opencv_objdetect231.lib;opencv_ml231.lib;opencv_video231.lib;opencv_ts231.lib;libboost_thread-vc100-mt-gd-1_47.lib;libboost_thread-vc100-mt-1_47.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opencv_calib3d231d.lib;opencv_contrib231d.lib;opencv_core231d.lib;opencv_features2d231d.lib;opencv_flann231d.lib;opencv_gpu231d.lib;opencv_highgui231d.lib;opencv_imgproc231d.lib;opencv_objdetect231d.lib;opencv_ml231d.lib;opencv_video231d.lib;opencv_ts231d.lib;libboost_thread-vc100-mt-gd-1_47.lib;libboost_thread-vc100-mt-1_47.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)opencv/gpu/x86/lib;$(SolutionDir)boost/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -80,7 +81,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(SolutionDir)boost/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)opencv/gpu/x86/lib;$(SolutionDir)boost/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opencv_calib3d231.lib;opencv_contrib231.lib;opencv_core231.lib;opencv_features2d231.lib;opencv_flann231.lib;opencv_gpu231.lib;opencv_highgui231.lib;opencv_imgproc231.lib;opencv_objdetect231.lib;opencv_ml231.lib;opencv_video231.lib;opencv_ts231.lib;libboost_thread-vc100-mt-gd-1_47.lib;libboost_thread-vc100-mt-1_47.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
