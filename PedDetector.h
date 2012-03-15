@@ -10,6 +10,8 @@
 #define AVC_PedDetector_h
 
 #include "opencv2/opencv.hpp"
+#include "opencv2/gpu/gpu.hpp"
+
 using namespace cv;
 using namespace std;
 
@@ -24,7 +26,7 @@ public:
 protected:
     string windowName;
     
-    HOGDescriptor hog;    
+    gpu::HOGDescriptor hog;    
 };
 
 #endif

@@ -47,6 +47,14 @@ int _tmain(int argc, _TCHAR* argv[])
 	//char filePath[] = "curve_test.avi";
     char filePath[] = "C:\\AVC_Output\\AVC_Data\\ped1.avi";
     
+	try
+	{
+		cout << "CUDA found : "<< gpu::getCudaEnabledDeviceCount() << endl;
+	}
+	catch(const cv::Exception& ex)
+	{
+		cout << "CUDA is not available\n" << ex.what() << endl;
+	}
     
 	AVCNetwork *netModule = NULL;
 
@@ -108,18 +116,6 @@ int _tmain(int argc, _TCHAR* argv[])
 		if (!current_frame.empty() )
 		{
 			imshow("Original", current_frame);
-			
-            /*
-			gpu test
-			cv::Mat src_host;
-			cvtColor(current_frame , src_host, CV_RGB2GRAY );
-			cv::gpu::GpuMat dst, src;
-			src.upload(src_host);
-			cv::gpu::threshold(src, dst, 128.0, 255.0, CV_THRESH_BINARY);
-
-			src_host = dst;
-			imshow("gpu",src_host);
-			*/
             // 버드아이뷰
             //getBirdEyeView(current_frame);
 			//laneDetector->runModule(current_frame, cv::Rect(232,0,261,current_frame.rows));
@@ -127,10 +123,9 @@ int _tmain(int argc, _TCHAR* argv[])
             // 일반
             AVCTimeProfiler::begin();
 			
-            //laneDetector->runModule(current_frame, cv::Rect(0,310,current_frame.cols,current_frame.rows-310));
-            
+            //laneDetector->runModule(current_frame, cv::Rect(0,310,current_frame.cols,current_frame.rows-310));          
             //roadAreaDetector->runModule(current_frame, cv::Rect(0,0,1,1));
-            //pedDetector->runModule(current_frame, cv::Rect(320,170,current_frame.cols-320,current_frame.rows-170-100));            
+            pedDetector->runModule(current_frame, cv::Rect(320,170,current_frame.cols-320,current_frame.rows-170-100));            
             AVCTimeProfiler::end();
             AVCTimeProfiler::print();
             
