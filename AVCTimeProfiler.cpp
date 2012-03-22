@@ -20,19 +20,20 @@
 #include <stdlib.h>
 #include <iostream>
 
-#ifdef MAC_OS
+#ifdef MAC_OS_X_VERSION_10_7
     #include <sys/time.h>
 #else
 	#include <time.h>
-#endif
-
-using namespace std;
-
 struct timezone
 {
     int tz_minuteswest;
     int tz_dsttime;
 };
+
+#endif
+
+using namespace std;
+
 
 //윈도우용 함수
 //int CC_DLL gettimeofday(struct timeval *, struct timezone *);
@@ -43,7 +44,7 @@ int AVCTimeProfiler::getCurrentTime(AVCTime *tp)
 {
     if (tp)
     {
-#ifdef MAC_OS
+#ifdef MAC_OS_X_VERSION_10_7
 		//맥 전용함수?
         gettimeofday((struct timeval *)tp,  0);
 #else

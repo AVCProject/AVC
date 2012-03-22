@@ -65,7 +65,7 @@ void onMouse2( int event, int x, int y, int, void* )
     }
 }
 
-#ifdef MAC_OS
+#ifdef MAC_OS_X_VERSION_10_7
 string getFilePathFromBundle(const char* aName);
 #endif
 
@@ -412,7 +412,7 @@ void getBirdEyeView(Mat& src)
 
 
 
-#ifdef MAC_OS
+#ifdef MAC_OS_X_VERSION_10_7
 string getFilePathFromBundle(const char* aName)
 {
 	char path[512];
