@@ -16,7 +16,7 @@ PedDetector::PedDetector(const char* aWindowName)
 	windowName = aWindowName;
 
 
-#ifdef MAC_OS_X_VERSION_10_6
+#ifdef MAC_OS
 	hog->setSVMDetector(HOGDescriptor::getPeopleDetector64x128());
 #else
 	//HOGDescriptor(Size win_size=Size(64, 128), , , , ,

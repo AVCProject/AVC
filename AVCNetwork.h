@@ -14,7 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef MAC_OS_X_VERSION_10_6
+#ifdef MAC_OS
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>

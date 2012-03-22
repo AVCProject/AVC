@@ -1,38 +1,28 @@
-//
-//  CamShift.cpp
-//  FaceTracker
-//
-//  Created by YoungJae Kwon on 11. 4. 25..
-//  Copyright 2011 __MyCompanyName__. All rights reserved.
-//
-
+/*
+ *  main.cpp
+ *  AVC
+ *
+ *  Created by YoungJae Kwon on 11. 8. 11..
+ *  Copyright 2011 __MyCompanyName__. All rights reserved.
+ *
+ */
 
 #include "opencv2/opencv.hpp"
-
-
+#include <cassert>
 #include <iostream>
-#include <ctype.h>
+#include "LaneDetector.h"
+
+#include "AVCNetwork.h"
+#include "boost/thread.hpp"
+#include "AVCTimeProfiler.h"
+#include "RoadAreaDetector.h"
+#include "PedDetector.h"
+
+
+//#include <ctype.h>
 
 using namespace cv;
 using namespace std;
-
-
-void help()
-{
-	cout << "\nThis is a demo that shows mean-shift based tracking\n"
-    <<   "You select a color objects such as your face and it tracks it.\n"
-    <<   "This reads from video camera (0 by default, or the camera number the user enters\n"
-    << "Call:\n"
-    << "\n./camshiftdemo [camera number]"
-    << "\n" << endl;
-    
-	cout << "\n\nHot keys: \n"
-    "\tESC - quit the program\n"
-    "\tc - stop the tracking\n"
-    "\tb - switch to/from backprojection view\n"
-    "\th - show/hide object histogram\n"
-    "To initialize tracking, select the object with mouse\n" << endl;
-}
 
 Mat image;
 
@@ -41,9 +31,7 @@ bool selectObject = false;
 int trackObject = 0;
 bool showHist = true;
 
-
 // MacType.h의 Rect,Point와 OpenCV와 충돌일어남 명시적으로 적어줄것
-
 Point2i origin;
 cv::Rect selection;
 
@@ -77,31 +65,6 @@ void onMouse2( int event, int x, int y, int, void* )
     }
 }
 
-
-
-
-
-
-/*
- *  main.cpp
- *  AVC
- *
- *  Created by YoungJae Kwon on 11. 8. 11..
- *  Copyright 2011 __MyCompanyName__. All rights reserved.
- *
- */
-
-#include "opencv2/opencv.hpp"
-#include <cassert>
-#include <iostream>
-#include "LaneDetector.h"
-
-#include "AVCNetwork.h"
-#include "boost/thread.hpp"
-#include "AVCTimeProfiler.h"
-#include "RoadAreaDetector.h"
-#include "PedDetector.h"
-
 #ifdef MAC_OS
 string getFilePathFromBundle(const char* aName);
 #endif
@@ -132,11 +95,6 @@ int main (int argc, char * const argv[])
     Mat hsv, hue, mask, hist, histimg = Mat::zeros(200, 320, CV_8UC3), backproj;
     
     // 캠시프트 코드 끝
-    
-    
-    
-    
-    
     
     
 	bool isPaused = false;
@@ -227,7 +185,7 @@ int main (int argc, char * const argv[])
                     // hue를 가진 매트릭스에서 select된부분만을 새로 뽑아냄(Region Of Interest)
                     Mat roi(hue, selection), maskroi(mask, selection);
                     calcHist(&roi, 1, 0, maskroi, hist, 1, &histQtzSize, &pHueRanges);
-                     X);
+					normalize(hist, hist, 0, 255, CV_MINMAX);
                     
                     trackWindow = selection;
                     trackObject = 1;
