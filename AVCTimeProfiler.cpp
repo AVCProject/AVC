@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <iostream>
 
-#ifdef MAC_OS_X_VERSION_10_6
+#ifdef MAC_OS
     #include <sys/time.h>
 #else
 	#include <time.h>
@@ -43,7 +43,7 @@ int AVCTimeProfiler::getCurrentTime(AVCTime *tp)
 {
     if (tp)
     {
-#ifdef MAC_OS_X_VERSION_10_6
+#ifdef MAC_OS
 		//맥 전용함수?
         gettimeofday((struct timeval *)tp,  0);
 #else
