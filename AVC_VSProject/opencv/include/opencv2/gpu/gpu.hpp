@@ -1159,10 +1159,10 @@ namespace cv
             enum { DESCR_FORMAT_ROW_BY_ROW, DESCR_FORMAT_COL_BY_COL };
 
             HOGDescriptor(Size win_size=Size(64, 128), Size block_size=Size(16, 16),
-                          Size block_stride=Size(8, 8), Size cell_size=Size(8, 8),
-                          int nbins=9, double win_sigma=DEFAULT_WIN_SIGMA,
-                          double threshold_L2hys=0.2, bool gamma_correction=true,
-                          int nlevels=DEFAULT_NLEVELS);
+                  Size block_stride=Size(8, 8), Size cell_size=Size(8, 8),
+                  int nbins=9, double win_sigma=DEFAULT_WIN_SIGMA,
+                  double threshold_L2hys=0.2, bool gamma_correction=true,
+                  int nlevels=DEFAULT_NLEVELS);
 
             size_t getDescriptorSize() const;
             size_t getBlockHistogramSize() const;

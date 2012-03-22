@@ -25,8 +25,12 @@ public:
     
 protected:
     string windowName;
-    
-    gpu::HOGDescriptor hog;    
+
+#ifdef MAC_OS_X_VERSION_10_6
+	HOGDescriptor* hog;    
+#else
+    gpu::HOGDescriptor* hog;    
+#endif
 };
 
 #endif

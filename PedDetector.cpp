@@ -1,4 +1,4 @@
-//
+﻿//
 //  PedDetector.cpp
 //  AVC
 //
@@ -15,8 +15,19 @@ PedDetector::PedDetector(const char* aWindowName)
 {
 	windowName = aWindowName;
 
-	//hog.setSVMDetector(gpu::HOGDescriptor::getDefaultPeopleDetector());
-    hog.setSVMDetector(gpu::HOGDescriptor::getPeopleDetector64x128());
+
+#ifdef MAC_OS_X_VERSION_10_6
+	hog->setSVMDetector(HOGDescriptor::getPeopleDetector64x128());
+#else
+	//HOGDescriptor(Size win_size=Size(64, 128), , , , ,
+ //                         double threshold_L2hys=0.2, 
+//							bool gamma_correction=true,
+ //                         int nlevels=DEFAULT_NLEVELS);
+
+	hog = new gpu::HOGDescriptor(Size(48, 96),Size(16, 16),Size(8,8), Size(8,8),9,-1,0.2,true,64);
+	hog->setSVMDetector(gpu::HOGDescriptor::getPeopleDetector48x96());
+	//hog->setSVMDetector(gpu::HOGDescriptor::getPeopleDetector64x128());
+#endif
   
     namedWindow( aWindowName, 0 );
     
@@ -40,8 +51,14 @@ void PedDetector::runModule(Mat &frame, cv::Rect roiRect)
     gpuSrcRGB.upload(ROI);
 	gpu::cvtColor(gpuSrcRGB,gpuSrcGray,CV_RGB2GRAY);
 
-    //hog.detectMultiScale(gpuSrcGray, found, -0.3, cv::Size(8,8), cv::Size(0,0), 1.05, 2);
-	hog.detectMultiScale(gpuSrcGray, found, -0.3, cv::Size(8,8), cv::Size(0,0), 1.03, 2);
+    //hog->detectMultiScale(gpuSrcGray, found, -0.3, cv::Size(8,8), cv::Size(0,0), 1.05, 2);
+	//hit_threshold – Threshold for the distance between features and SVM classifying plane.
+	//Usually it is 0 and should be specfied in the detector coefficients (as the last free coefficient).
+	//But if the free coefficient is omitted (which is allowed), you can specify it manually here.
+
+	//SVM 문턱값을 높이되, ->너무 높으면 정면보행자가 아니라 디텍션 불가 1.4 정도?
+	//멀티스케일 계수를 적절히 조정할것 1.03정도면 30~40ms
+	hog->detectMultiScale(gpuSrcGray, found, 1.4, cv::Size(8,8), cv::Size(0,0), 1.02, 2);
     
 	t = (double)getTickCount() - t;
 	printf("tdetection time = %gms\n", t*1000./cv::getTickFrequency());
