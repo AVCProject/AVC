@@ -1,3 +1,87 @@
+//
+//  CamShift.cpp
+//  FaceTracker
+//
+//  Created by YoungJae Kwon on 11. 4. 25..
+//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//
+
+
+#include "opencv2/opencv.hpp"
+
+
+#include <iostream>
+#include <ctype.h>
+
+using namespace cv;
+using namespace std;
+
+
+void help()
+{
+	cout << "\nThis is a demo that shows mean-shift based tracking\n"
+    <<   "You select a color objects such as your face and it tracks it.\n"
+    <<   "This reads from video camera (0 by default, or the camera number the user enters\n"
+    << "Call:\n"
+    << "\n./camshiftdemo [camera number]"
+    << "\n" << endl;
+    
+	cout << "\n\nHot keys: \n"
+    "\tESC - quit the program\n"
+    "\tc - stop the tracking\n"
+    "\tb - switch to/from backprojection view\n"
+    "\th - show/hide object histogram\n"
+    "To initialize tracking, select the object with mouse\n" << endl;
+}
+
+Mat image;
+
+bool backprojMode = false;
+bool selectObject = false;
+int trackObject = 0;
+bool showHist = true;
+
+
+// MacType.h의 Rect,Point와 OpenCV와 충돌일어남 명시적으로 적어줄것
+
+Point2i origin;
+cv::Rect selection;
+
+int vmin = 10, vmax = 256, smin = 30;
+
+void onMouse2( int event, int x, int y, int, void* )
+{
+    
+    if( selectObject )
+    {
+        selection.x = MIN(x, origin.x);
+        selection.y = MIN(y, origin.y);
+        selection.width = std::abs(x - origin.x);
+        selection.height = std::abs(y - origin.y);
+        
+        selection &= cv::Rect(0, 0, image.cols, image.rows);
+    }
+    
+    switch( event )
+    {
+        case CV_EVENT_LBUTTONDOWN:
+            origin = cv::Point(x,y);
+            selection = cv::Rect(x,y,0,0);
+            selectObject = true;
+            break;
+        case CV_EVENT_LBUTTONUP:
+            selectObject = false;
+            if( selection.width > 0 && selection.height > 0 )
+                trackObject = -1;
+            break;
+    }
+}
+
+
+
+
+
+
 /*
  *  main.cpp
  *  AVC
@@ -7,57 +91,62 @@
  *
  */
 
-#ifdef MAC_OS_X_VERSION_10_6
-
-#else
-	#include "opencv2/gpu/gpu.hpp"
-#endif
-
-#include "stdafx.h"
 #include "opencv2/opencv.hpp"
 #include <cassert>
 #include <iostream>
 #include "LaneDetector.h"
 
 #include "AVCNetwork.h"
+#include "boost/thread.hpp"
 #include "AVCTimeProfiler.h"
 #include "RoadAreaDetector.h"
 #include "PedDetector.h"
 
-
-
-
-
-#ifdef MAC_OS_X_VERSION_10_6
+#ifdef MAC_OS
 string getFilePathFromBundle(const char* aName);
 #endif
 
 
 void getBirdEyeView(Mat& src);
 
-#ifdef MAC_OS_X_VERSION_10_6
 int main (int argc, char * const argv[]) 
-#else
-int _tmain(int argc, _TCHAR* argv[])
-#endif
 {
-	bool isPaused = false;
-	bool isNetworkOn = false;
-    bool isSourceLive = false;
-	//char filePath[] = "curve_test.avi";
-    char filePath[] = "C:\\AVC_Output\\AVC_Data\\ped1.avi";
+    // 캠시프트 코드 시작
+    cv::Rect trackWindow;
+    RotatedRect trackBox;
     
-	try
-	{
-		cout << "CUDA found : "<< gpu::getCudaEnabledDeviceCount() << endl;
-	}
-	catch(const cv::Exception& ex)
-	{
-		cout << "CUDA is not available\n" << ex.what() << endl;
-	}
+    // 0 ~ 180사이의 hue값을 레벨당 16만큼 양자화
+    int histQtzSize = 16;
+    
+    // hue varies from 0 to 179, see cvtColor
+    float hueRanges[] = {0,180};
+    const float* pHueRanges = hueRanges;
+
+    namedWindow( "Histogram", CV_WINDOW_AUTOSIZE );
+    namedWindow( "CamShift Demo", CV_WINDOW_AUTOSIZE );
+    setMouseCallback( "CamShift Demo", onMouse2, 0 );
+    //  createTrackbar( "Vmin", "CamShift Demo", &vmin, 256, 0 );
+    //  createTrackbar( "Vmax", "CamShift Demo", &vmax, 256, 0 );
+    //  createTrackbar( "Smin", "CamShift Demo", &smin, 256, 0 );
+    
+    Mat hsv, hue, mask, hist, histimg = Mat::zeros(200, 320, CV_8UC3), backproj;
+    
+    // 캠시프트 코드 끝
+    
+    
+    
+    
+    
+    
+    
+	bool isPaused = false;
+	bool isNetworkOn = true;
+    bool isSourceLive = true;
+	//char filePath[] = "curve_test.avi";
+    char filePath[] = "ped1.avi";
     
 	AVCNetwork *netModule = NULL;
-
+    
 	if (isNetworkOn) 
 	{
         netModule = new AVCNetwork();
@@ -65,8 +154,9 @@ int _tmain(int argc, _TCHAR* argv[])
         netModule->start();
 	}
     
+    
 	VideoCapture cap;
-
+    
     if (isSourceLive) 
     {
         // 카메라 라이브 로딩
@@ -79,7 +169,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	
 	// 저장된 비디오에서 로딩
 	
-
+    
     if( !cap.isOpened() )
     {
         cout << "***Could not initialize capturing...***\n";
@@ -89,7 +179,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	LaneDetector *laneDetector = new LaneDetector("LaneDetector");
     RoadAreaDetector *roadAreaDetector = new RoadAreaDetector("RoadAreaDetector");
     PedDetector *pedDetector = new PedDetector("PedDetector");
-
+    
 	AVCData avcData;
 	Mat current_frame;
 	while (1) 
@@ -115,17 +205,121 @@ int _tmain(int argc, _TCHAR* argv[])
 		cap >> current_frame;
 		if (!current_frame.empty() )
 		{
-			imshow("Original", current_frame);
+			//imshow("Original", current_frame);
+			current_frame.copyTo(image);
+            
+            //캠시프트 시작
+            cvtColor(current_frame, hsv, CV_BGR2HSV);
+            
+            if( trackObject )
+            {
+                int _vmin = vmin, _vmax = vmax;
+                
+                inRange(hsv, Scalar(0, smin, MIN(_vmin,_vmax)),
+                        Scalar(180, 256, MAX(_vmin, _vmax)), mask);
+                int ch[] = {0, 0};
+                hue.create(hsv.size(), hsv.depth());
+                mixChannels(&hsv, 1, &hue, 1, ch, 1);
+                
+                // 새로운 영역이 마우스에 의해서 선택되었을 경우 히스토그램 새로 추출
+                if( trackObject < 0 )
+                {
+                    // hue를 가진 매트릭스에서 select된부분만을 새로 뽑아냄(Region Of Interest)
+                    Mat roi(hue, selection), maskroi(mask, selection);
+                    calcHist(&roi, 1, 0, maskroi, hist, 1, &histQtzSize, &pHueRanges);
+                     X);
+                    
+                    trackWindow = selection;
+                    trackObject = 1;
+                    
+                    histimg = Scalar::all(0);
+                    int binW = histimg.cols / histQtzSize;
+                    Mat buf(1, histQtzSize, CV_8UC3);
+                    
+                    for( int i = 0; i < histQtzSize; i++ )
+                        buf.at<Vec3b>(i) = Vec3b(saturate_cast<uchar>(i*180./histQtzSize), 255, 255);
+                    
+                    cvtColor(buf, buf, CV_HSV2BGR);
+                    
+                    // 히스토그램을 계산해서 출력
+                    for( int i = 0; i < histQtzSize; i++ )
+                    {
+                        int val = saturate_cast<int>(hist.at<float>(i)*histimg.rows/255);
+                        rectangle( histimg, 
+                                  Point2i(i*binW, histimg.rows),
+                                  Point2i((i+1)*binW, histimg.rows - val),
+                                  Scalar(buf.at<Vec3b>(i)), -1, 8 );
+                    }
+                }
+                
+                // hue 이미지를 히스토그램 backprojection하여 face probability 이미지 생성(변수명 backproj)
+                // Similarly to calcHist , at each location (x, y) the function collects the values from the selected 
+                // channels in the input images and finds the corresponding histogram bin. 
+                // But instead of incrementing it, the function reads the bin value, scales it by scale and stores in backProject(x,y)
+                
+                calcBackProject(&hue, 1, 0, hist, backproj, &pHueRanges);
+                backproj &= mask;
+                
+                // CAM(Continuously Adaptive Mean) shift 
+                // It finds this new location by starting at the previous location and computing the center of gravity of the face-probability values within a rectangle.
+                // It then shifts the rectangle so it's right over the center of gravity
+                
+                // CamShift( 얼굴확률 이미지, 트랙킹할 렉트, 조건 )
+                RotatedRect trackBox = CamShift(backproj, trackWindow,
+                                                TermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1 ));
+                
+                // backproject된  face probability를 이미지 형태로 출력
+                if( backprojMode )
+                    cvtColor( backproj, image, CV_GRAY2BGR );
+                
+                // 오브젝트 트래킹 타원 그리기
+                ellipse( image, trackBox, Scalar(0,0,255), 3, CV_AA );
+            }
+            
+            // 마우스 선택영역 반전
+            if( selectObject && selection.width > 0 && selection.height > 0 )
+            {
+                Mat roi(image, selection);
+                bitwise_not(roi, roi);
+            }
+            
+            imshow( "CamShift Demo", image );
+            imshow( "Histogram", histimg );
+            
+            switch(key)
+            {
+                case 'b':
+                    backprojMode = !backprojMode;
+                    break;
+                case 'c':
+                    trackObject = 0;
+                    histimg = Scalar::all(0);
+                    break;
+                case 'h':
+                    showHist = !showHist;
+                    if( !showHist )
+                        destroyWindow( "Histogram" );
+                    else
+                        namedWindow( "Histogram", 1 );
+                    break;
+                default:
+                    ;
+            }
+
+            
+            // 캠시프트 끝
+            
             // 버드아이뷰
             //getBirdEyeView(current_frame);
 			//laneDetector->runModule(current_frame, cv::Rect(232,0,261,current_frame.rows));
-
+            
             // 일반
             AVCTimeProfiler::begin();
 			
-            //laneDetector->runModule(current_frame, cv::Rect(0,310,current_frame.cols,current_frame.rows-310));          
+            //laneDetector->runModule(current_frame, cv::Rect(0,310,current_frame.cols,current_frame.rows-310));
+            
             //roadAreaDetector->runModule(current_frame, cv::Rect(0,0,1,1));
-            pedDetector->runModule(current_frame, cv::Rect(320,170,current_frame.cols-320,current_frame.rows-170-100));            
+            //pedDetector->runModule(current_frame, cv::Rect(320,170,current_frame.cols-320,current_frame.rows-170-100));            
             AVCTimeProfiler::end();
             AVCTimeProfiler::print();
             
@@ -137,11 +331,11 @@ int _tmain(int argc, _TCHAR* argv[])
                 avcData.laneValidity =5;   
                 
                 avcData.steering = 0.5;
-				//avcData.angleLeft = laneDetector->angleLeft;
-				//avcData.angleRight = laneDetector->angleRight;
+				avcData.angleLeft = laneDetector->angleLeft;
+				avcData.angleRight = laneDetector->angleRight;
                 avcData.trafficSign = 1;
-            
-
+                
+                
                 netModule->addToQueue(avcData);
             }
             
@@ -154,22 +348,26 @@ int _tmain(int argc, _TCHAR* argv[])
                 cap.open(filePath);
             }
 		}
-
+        
 	}
 	
     
-
+    
     // 리소스 해제
     if (netModule != NULL) 
     {
         netModule->stop();
         delete netModule;
     }
-
+    
     delete laneDetector;
 	
-	return 0;
 }
+
+void getHist(Mat& src)
+{
+}
+
 //void getBirdEyeView(Mat& src, CV_OUT Mat& dst)
 void getBirdEyeView(Mat& src)
 {
@@ -256,7 +454,7 @@ void getBirdEyeView(Mat& src)
 
 
 
-#ifdef MAC_OS_X_VERSION_10_6
+#ifdef MAC_OS
 string getFilePathFromBundle(const char* aName)
 {
 	char path[512];
@@ -278,7 +476,7 @@ string getFilePathFromBundle(const char* aName)
         assert(0);
 	
 	CFRelease(cfStringRef); 
-
+    
 	
 	string pathStr = path;
 	return pathStr;
