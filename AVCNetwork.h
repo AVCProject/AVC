@@ -21,7 +21,8 @@
 #include <time.h>
 #else
 //#include <windows.h>
-#include <winsock2.h>
+//gpuMat의 min 함수와 윈도우즈 매크로가 충돌한다.
+//#include <winsock2.h>
 #endif
 
 

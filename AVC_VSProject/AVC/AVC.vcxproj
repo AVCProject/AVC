@@ -39,7 +39,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)AVC;$(SolutionDir)boost;$(SolutionDir)opencv\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)boost;$(SolutionDir)opencv\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
     <OutDir>C:\AVC_Output\</OutDir>
     <IntDir>C:\AVC_Output\Intermediate\</IntDir>
@@ -48,7 +48,7 @@
     <LinkIncremental>false</LinkIncremental>
     <OutDir>C:\AVC_Output</OutDir>
     <IntDir>C:\AVC_Output\Intermediate</IntDir>
-    <IncludePath>$(SolutionDir)AVC;$(SolutionDir)boost;$(SolutionDir)opencv\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)boost;$(SolutionDir)opencv\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -88,6 +88,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\AVCNetwork.h" />
     <ClInclude Include="..\..\AVCTimeProfiler.h" />
+    <ClInclude Include="..\..\global.h" />
     <ClInclude Include="..\..\LaneDetector.h" />
     <ClInclude Include="..\..\PedDetector.h" />
     <ClInclude Include="..\..\RoadAreaDetector.h" />

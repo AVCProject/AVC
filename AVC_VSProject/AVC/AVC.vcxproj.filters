@@ -42,6 +42,7 @@
     <ClInclude Include="..\..\AVCTimeProfiler.h">
       <Filter>AVCLib</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\global.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

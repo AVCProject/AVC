@@ -11,6 +11,7 @@
 
 #include "AVCTimeProfiler.h"
 
+#include "opencv2/opencv.hpp"
 
 #include <math.h>
 
@@ -34,7 +35,7 @@ struct timezone
 
 using namespace std;
 
-
+static double g_time;
 //윈도우용 함수
 //int CC_DLL gettimeofday(struct timeval *, struct timezone *);
 
@@ -66,20 +67,25 @@ AVCTime AVCTimeProfiler::getTimeDiff(AVCTime *start, AVCTime *end)
 
 void AVCTimeProfiler::begin()
 {
-    getCurrentTime(&beginTime);
+    //getCurrentTime(&beginTime);
+	g_time = (double)cv::getTickCount();
 }
 
 void AVCTimeProfiler::end()
 {
-    AVCTime currentTime;
-    getCurrentTime(&currentTime);
-    
-    resultTime = getTimeDiff(&beginTime , &currentTime);
+//     AVCTime currentTime;
+//     getCurrentTime(&currentTime);    
+//     resultTime = getTimeDiff(&beginTime , &currentTime);
+
+	g_time = (double)cv::getTickCount() - g_time;
+	printf("ElapsedTime = %gms\n", g_time*1000./cv::getTickFrequency());
 }
 void AVCTimeProfiler::print()
 {
-    double elapsed = resultTime.tv_sec*1000 + resultTime.tv_usec/1000;
-    std::cout << "ElapsedTime : " << elapsed  << "ms\n";
+//     double elapsed = resultTime.tv_sec*1000 + resultTime.tv_usec/1000;
+//     std::cout << "ElapsedTime : " << elapsed  << "ms\n";
+
+	
 }
 
 
