@@ -45,8 +45,8 @@ int main (int argc, char * const argv[])
 	bool isNetworkOn = true;
     bool isSourceLive = false;
 	//char filePath[] = "curve_test.avi";
-    char filePath[] = "C:\\AVCData\\1322203220.avi"; //"c:\\AVC_Output\\AVC_Data\\ped1.avi";
-    
+    //char filePath[] = "C:\\AVCData\\1322203220.avi";
+    char filePath[] = "c:\\AVC_Output\\AVC_Data\\ped1.avi";
 	AVCNetwork *netModule = NULL;
     
 	if (isNetworkOn) 
@@ -78,9 +78,9 @@ int main (int argc, char * const argv[])
         return 0;
     }
 	
-	LaneDetector *laneDetector = new LaneDetector("LaneDetector");
-    RoadAreaDetector *roadAreaDetector = new RoadAreaDetector("RoadAreaDetector");
-    //PedDetector *pedDetector = new PedDetector("PedDetector");
+	//LaneDetector *laneDetector = new LaneDetector("LaneDetector");
+    //RoadAreaDetector *roadAreaDetector = new RoadAreaDetector("RoadAreaDetector");
+    PedDetector *pedDetector = new PedDetector("PedDetector");
 	EagleTraffic *trafficDetector = new EagleTraffic(EAGLETRAFFIC_LIGHTTYPE_VERTICAL);
     
 	int frameCnt = 0;
@@ -133,18 +133,24 @@ int main (int argc, char * const argv[])
             //getBirdEyeView(current_frame);
 			//laneDetector->runModule(current_frame, cv::Rect(232,0,261,current_frame.rows));
             
-            // 일반
-            //AVCTimeProfiler::begin();
+            // 디텍팅 시작
+            AVCTimeProfiler::begin();
 			
             //laneDetector->runModule(current_frame, cv::Rect(0,310,current_frame.cols,current_frame.rows-310));
             
             //roadAreaDetector->runModule(current_frame, cv::Rect(0,0,1,1));
-            //pedDetector->runModule(current_frame, cv::Rect(320,170,current_frame.cols-320,current_frame.rows-170-100));
+			
 
 			int res = trafficDetector->decideTrafficLight(current_frame);
 
-			cout << "current frame" << frameCnt << endl;
-            //AVCTimeProfiler::end();
+			cout << "Traffic Sign : " << res << endl;
+			// ROI 부분의 레퍼런스만 갖고가기때문에 실제 current_frame위에 사각형 그려진다.
+			pedDetector->runModule(current_frame, cv::Rect(320,170,current_frame.cols-320,current_frame.rows-170-100));
+
+			imshow("Original",current_frame);
+
+			//cout << "current frame" << frameCnt << endl;
+            AVCTimeProfiler::end();
             //AVCTimeProfiler::print();
             
             if( isNetworkOn )
@@ -155,8 +161,8 @@ int main (int argc, char * const argv[])
                 avcData.laneValidity =5;   
                 
                 avcData.steering = 0.5;
-				avcData.angleLeft = laneDetector->angleLeft;
-				avcData.angleRight = laneDetector->angleRight;
+//				avcData.angleLeft = laneDetector->angleLeft;
+	//			avcData.angleRight = laneDetector->angleRight;
                 avcData.trafficSign = 1;
                 
                 
@@ -185,7 +191,8 @@ int main (int argc, char * const argv[])
         delete netModule;
     }
     
-    delete laneDetector;
+    //delete laneDetector;
+	delete pedDetector;
 	
 }
 

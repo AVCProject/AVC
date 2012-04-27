@@ -427,7 +427,7 @@ void PedDetector::runModule(Mat &frame, cv::Rect roiRect)
 
 	isFound = false;
     
-    imshow(windowName, ROI);
+    //imshow(windowName, ROI);
 	
 }
 
