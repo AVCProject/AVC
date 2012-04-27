@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<opencv_storage>
+<bin_threshold>128</bin_threshold>
+<bin_thresholdType>1</bin_thresholdType>
+<hough_threshold>50</hough_threshold>
+<b_max>77</b_max>
+<r_min>100</r_min>
+<g_min>70</g_min>
+<b_min>30</b_min>
+</opencv_storage>
