@@ -43,6 +43,9 @@
       <Filter>AVCLib</Filter>
     </ClInclude>
     <ClInclude Include="..\..\global.h" />
+    <ClInclude Include="..\..\EagleTraffic.h">
+      <Filter>DetectionModule</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -64,5 +67,8 @@
       <Filter>AVCLib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\main.cpp" />
+    <ClCompile Include="..\..\EagleTraffic.cpp">
+      <Filter>DetectionModule</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

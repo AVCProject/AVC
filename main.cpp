@@ -19,6 +19,7 @@
 #include "AVCTimeProfiler.h"
 #include "RoadAreaDetector.h"
 #include "PedDetector.h"
+#include "EagleTraffic.h"
 #include <opencv2/gpu/gpu.hpp>
 
 //#include <ctype.h>
@@ -44,7 +45,7 @@ int main (int argc, char * const argv[])
 	bool isNetworkOn = true;
     bool isSourceLive = false;
 	//char filePath[] = "curve_test.avi";
-    char filePath[] = "c:\\AVC_Output\\AVC_Data\\ped1.avi";
+    char filePath[] = "C:\\AVCData\\1322203220.avi"; //"c:\\AVC_Output\\AVC_Data\\ped1.avi";
     
 	AVCNetwork *netModule = NULL;
     
@@ -79,7 +80,8 @@ int main (int argc, char * const argv[])
 	
 	LaneDetector *laneDetector = new LaneDetector("LaneDetector");
     RoadAreaDetector *roadAreaDetector = new RoadAreaDetector("RoadAreaDetector");
-    PedDetector *pedDetector = new PedDetector("PedDetector");
+    //PedDetector *pedDetector = new PedDetector("PedDetector");
+	EagleTraffic *trafficDetector = new EagleTraffic(EAGLETRAFFIC_LIGHTTYPE_VERTICAL);
     
 	int frameCnt = 0;
 	AVCData avcData;
@@ -137,7 +139,10 @@ int main (int argc, char * const argv[])
             //laneDetector->runModule(current_frame, cv::Rect(0,310,current_frame.cols,current_frame.rows-310));
             
             //roadAreaDetector->runModule(current_frame, cv::Rect(0,0,1,1));
-            pedDetector->runModule(current_frame, cv::Rect(320,170,current_frame.cols-320,current_frame.rows-170-100));
+            //pedDetector->runModule(current_frame, cv::Rect(320,170,current_frame.cols-320,current_frame.rows-170-100));
+
+			int res = trafficDetector->decideTrafficLight(current_frame);
+
 			cout << "current frame" << frameCnt << endl;
             //AVCTimeProfiler::end();
             //AVCTimeProfiler::print();
