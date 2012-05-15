@@ -12,6 +12,10 @@
 #include "opencv2/opencv.hpp"
 #include "opencv2/gpu/gpu.hpp"
 
+#ifdef WIN32
+#define GPU_AVAILABLE
+#endif
+
 using namespace cv;
 using namespace std;
 
@@ -36,7 +40,9 @@ public:
 
 	void onMouse( int event, int x, int y, int, void* );
 	void runModule(Mat &frame,cv::Rect roiRect);
-    
+
+    bool isFound;					// 현재 프레임에서 사람이 발견되었는지 여부
+	float distance;					// 현재 프레임에서 사람이 발견되었는지 여부
 protected:
     string windowName;
 
@@ -72,7 +78,7 @@ protected:
 
 	int pedContinuousNotFoundCnt;	// 보행자가 연속으로 발견되지 않은 카운트
 	bool isMode48x96;				// 현재 디스크립터 동작 모드
-	bool isFound;					// 현재 프레임에서 사람이 발견되었는지 여부
+	
 
 	// 파라메터 설정값 모음
 	float param_colorPixelPercentTh;	// 찾아진 보행자에서 옷부분의 컬러비율 문턱값
@@ -87,12 +93,12 @@ protected:
 	void setModeTo48x96();
 	void setModeTo64x128();
 
-#ifdef MAC_OS_X_VERSION_10_7
-	HOGDescriptor* hogLarge;    
+#ifdef GPU_AVAILABLE
+	gpu::HOGDescriptor* hogSmall;  
+	gpu::HOGDescriptor* hogLarge;  
+	gpu::HOGDescriptor* hog;  
 #else
-    gpu::HOGDescriptor* hogSmall;  
-	 gpu::HOGDescriptor* hogLarge;  
-	 gpu::HOGDescriptor* hog;  
+	HOGDescriptor* hogLarge;    
 #endif
 };
 

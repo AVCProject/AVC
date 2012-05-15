@@ -11,9 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{5D8E1732-3B63-4238-9542-4847A6230270}</ProjectGuid>
+    <ProjectGuid>{A414521F-46F9-4C58-9299-A9FA54944A4C}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>AVC</RootNamespace>
+    <RootNamespace>AVCDataClient</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -39,16 +39,12 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)boost;$(SolutionDir)opencv\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(LibraryPath)</LibraryPath>
-    <OutDir>C:\AVC_Output\</OutDir>
-    <IntDir>C:\AVC_Output\Intermediate\</IntDir>
+    <IncludePath>$(SolutionDir)\..\;$(IncludePath)</IncludePath>
+    <OutDir>C:\AVC_Output\$(MSBuildProjectName)</OutDir>
+    <IntDir>C:\AVC_Output\$(MSBuildProjectName)\intermediate</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>C:\AVC_Output</OutDir>
-    <IntDir>C:\AVC_Output\Intermediate</IntDir>
-    <IncludePath>$(SolutionDir)boost;$(SolutionDir)opencv\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -56,59 +52,39 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>
-      </AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opencv_calib3d231d.lib;opencv_contrib231d.lib;opencv_core231d.lib;opencv_features2d231d.lib;opencv_flann231d.lib;opencv_gpu231d.lib;opencv_highgui231d.lib;opencv_imgproc231d.lib;opencv_objdetect231d.lib;opencv_ml231d.lib;opencv_video231d.lib;opencv_ts231d.lib;libboost_thread-vc100-mt-gd-1_47.lib;libboost_thread-vc100-mt-1_47.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)opencv/gpu/x86/lib;$(SolutionDir)boost/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)boost\boost;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(SolutionDir)opencv/gpu/x86/lib;$(SolutionDir)boost/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opencv_calib3d231.lib;opencv_contrib231.lib;opencv_core231.lib;opencv_features2d231.lib;opencv_flann231.lib;opencv_gpu231.lib;opencv_highgui231.lib;opencv_imgproc231.lib;opencv_objdetect231.lib;opencv_ml231.lib;opencv_video231.lib;opencv_ts231.lib;libboost_thread-vc100-mt-gd-1_47.lib;libboost_thread-vc100-mt-1_47.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\AVCData.h" />
-    <ClInclude Include="..\..\AVCNetwork.h" />
-    <ClInclude Include="..\..\AVCTimeProfiler.h" />
-    <ClInclude Include="..\..\EagleTraffic.h" />
-    <ClInclude Include="..\..\global.h" />
-    <ClInclude Include="..\..\LaneDetector.h" />
-    <ClInclude Include="..\..\PedDetector.h" />
-    <ClInclude Include="..\..\RoadAreaDetector.h" />
+    <None Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\AVCNetwork.cpp" />
-    <ClCompile Include="..\..\AVCTimeProfiler.cpp" />
-    <ClCompile Include="..\..\EagleTraffic.cpp" />
-    <ClCompile Include="..\..\LaneDetector.cpp" />
-    <ClCompile Include="..\..\main.cpp" />
-    <ClCompile Include="..\..\PedDetector.cpp" />
-    <ClCompile Include="..\..\RoadAreaDetector.cpp" />
-    <ClCompile Include="stdafx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-    </ClCompile>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="stdafx.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

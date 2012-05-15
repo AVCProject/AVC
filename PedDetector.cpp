@@ -7,7 +7,7 @@
 //
 
 // 디버그 모드: 결과값 콘솔에 출력
-#define PED_DEBUG 1
+//#define PED_DEBUG 1
 
 #include "PedDetector.h"
 #include "AVCTimeProfiler.h"
@@ -90,7 +90,6 @@ PedDetector::PedDetector(const char* aWindowName)
 	g_pedDetector = this;
 
 	
-	
 	// 백프로젝션 관련 변수 설정
 	backprojMode = false;
 	selectObject = false;
@@ -119,15 +118,16 @@ PedDetector::PedDetector(const char* aWindowName)
 	histRanges[1] = satRanges;
 
 	isFound = false;
+	distance = -1.0f;// 마이너스 값은 잘못된 거리가 측정되지 않을경우.
 	pedContinuousNotFoundCnt = 0;
 	hog = NULL;
 
-	setModeTo48x96();
-
-#ifdef MAC_OS_X_VERSION_10_7
-    hogLarge = new HOGDescriptor();
-	hogLarge->setSVMDetector(HOGDescriptor::getDefaultPeopleDetector());
+#ifdef GPU_AVAILABLE
+   setModeTo48x96();
 #else
+	hogLarge = new HOGDescriptor();
+	hogLarge->setSVMDetector(HOGDescriptor::getDefaultPeopleDetector());
+#endif
 
 	
 // 	hogLarge = new gpu::HOGDescriptor();
@@ -141,7 +141,6 @@ PedDetector::PedDetector(const char* aWindowName)
 // 		0.2, true, 64); // double threshold_L2hys=0.2, bool gamma_correction=true, int nlevels=DEFAULT_NLEVELS
 // 	hogSmall->setSVMDetector(gpu::HOGDescriptor::getPeopleDetector48x96());
 
-#endif  
 }
 
 void PedDetector::setModeTo48x96()
@@ -175,6 +174,7 @@ void PedDetector::setModeTo64x128()
 
 void PedDetector::runModule(Mat &frame, cv::Rect roiRect)
 {
+	isFound = false;
 	cv::Mat ROI(frame, roiRect);
 
 	/*
@@ -425,7 +425,7 @@ void PedDetector::runModule(Mat &frame, cv::Rect roiRect)
 			setModeTo48x96();
 	}
 
-	isFound = false;
+	
     
     //imshow(windowName, ROI);
 	

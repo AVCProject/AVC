@@ -10,21 +10,20 @@
 
 
 #include "opencv2/opencv.hpp"
+#include "boost/thread.hpp"
 #include <cassert>
 #include <iostream>
-#include "LaneDetector.h"
-
-#include "AVCNetwork.h"
-#include "boost/thread.hpp"
-#include "AVCTimeProfiler.h"
-#include "RoadAreaDetector.h"
-#include "PedDetector.h"
-#include "EagleTraffic.h"
-#include <opencv2/gpu/gpu.hpp>
 
 //#include <ctype.h>
 #include "global.h"
 
+#include "RoadAreaDetector.h"
+#include "LaneDetector.h"
+#include "PedDetector.h"
+#include "EagleTraffic.h"
+
+#include "AVCTimeProfiler.h"
+#include "AVCNetwork.h" // 인클루드 순서가 중요하다. opencv_gpu모듈이 인클루드 된 후에 적어줄것.
 
 using namespace cv;
 using namespace std;
@@ -134,36 +133,35 @@ int main (int argc, char * const argv[])
 			//laneDetector->runModule(current_frame, cv::Rect(232,0,261,current_frame.rows));
             
             // 디텍팅 시작
-            AVCTimeProfiler::begin();
+            //AVCTimeProfiler::begin();
 			
             //laneDetector->runModule(current_frame, cv::Rect(0,310,current_frame.cols,current_frame.rows-310));
             
             //roadAreaDetector->runModule(current_frame, cv::Rect(0,0,1,1));
 			
 
-			int res = trafficDetector->decideTrafficLight(current_frame);
+			int trafficSign = trafficDetector->decideTrafficLight(current_frame);
 
-			cout << "Traffic Sign : " << res << endl;
 			// ROI 부분의 레퍼런스만 갖고가기때문에 실제 current_frame위에 사각형 그려진다.
 			pedDetector->runModule(current_frame, cv::Rect(320,170,current_frame.cols-320,current_frame.rows-170-100));
 
 			imshow("Original",current_frame);
 
 			//cout << "current frame" << frameCnt << endl;
-            AVCTimeProfiler::end();
-            //AVCTimeProfiler::print();
+           //AVCTimeProfiler::end();
             
             if( isNetworkOn )
             {
 				// 결과 데이터 패키징해서 전송
                 avcData.marginLeft = 10;
                 avcData.marginRight = 20;
-                avcData.laneValidity =5;   
-                
-                avcData.steering = 0.5;
+                avcData.laneValidity = 5;   
+                avcData.trafficSign = trafficSign;
 //				avcData.angleLeft = laneDetector->angleLeft;
 	//			avcData.angleRight = laneDetector->angleRight;
                 avcData.trafficSign = 1;
+				avcData.isPedDetected = pedDetector->isFound;
+				avcData.pedDistance = pedDetector->distance;
                 
                 
                 netModule->addToQueue(avcData);

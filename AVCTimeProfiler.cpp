@@ -21,16 +21,16 @@
 #include <stdlib.h>
 #include <iostream>
 
-#ifdef MAC_OS_X_VERSION_10_7
-    #include <sys/time.h>
-#else
+#ifdef WIN32
 	#include <time.h>
-struct timezone
-{
-    int tz_minuteswest;
-    int tz_dsttime;
-};
-
+	struct timezone
+	{
+		int tz_minuteswest;
+		int tz_dsttime;
+	};
+  
+#else
+	  #include <sys/time.h>
 #endif
 
 using namespace std;

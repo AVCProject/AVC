@@ -3,16 +3,38 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AVC", "AVC\AVC.vcxproj", "{5D8E1732-3B63-4238-9542-4847A6230270}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AVCDataClient", "AVCDataClient\AVCDataClient.vcxproj", "{A414521F-46F9-4C58-9299-A9FA54944A4C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Mixed Platforms = Debug|Mixed Platforms
 		Debug|Win32 = Debug|Win32
+		Debug|x86 = Debug|x86
+		Release|Mixed Platforms = Release|Mixed Platforms
 		Release|Win32 = Release|Win32
+		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5D8E1732-3B63-4238-9542-4847A6230270}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{5D8E1732-3B63-4238-9542-4847A6230270}.Debug|Mixed Platforms.Build.0 = Debug|Win32
 		{5D8E1732-3B63-4238-9542-4847A6230270}.Debug|Win32.ActiveCfg = Debug|Win32
 		{5D8E1732-3B63-4238-9542-4847A6230270}.Debug|Win32.Build.0 = Debug|Win32
+		{5D8E1732-3B63-4238-9542-4847A6230270}.Debug|x86.ActiveCfg = Debug|Win32
+		{5D8E1732-3B63-4238-9542-4847A6230270}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{5D8E1732-3B63-4238-9542-4847A6230270}.Release|Mixed Platforms.Build.0 = Release|Win32
 		{5D8E1732-3B63-4238-9542-4847A6230270}.Release|Win32.ActiveCfg = Release|Win32
 		{5D8E1732-3B63-4238-9542-4847A6230270}.Release|Win32.Build.0 = Release|Win32
+		{5D8E1732-3B63-4238-9542-4847A6230270}.Release|x86.ActiveCfg = Release|Win32
+		{A414521F-46F9-4C58-9299-A9FA54944A4C}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{A414521F-46F9-4C58-9299-A9FA54944A4C}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{A414521F-46F9-4C58-9299-A9FA54944A4C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A414521F-46F9-4C58-9299-A9FA54944A4C}.Debug|Win32.Build.0 = Debug|Win32
+		{A414521F-46F9-4C58-9299-A9FA54944A4C}.Debug|x86.ActiveCfg = Debug|Win32
+		{A414521F-46F9-4C58-9299-A9FA54944A4C}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{A414521F-46F9-4C58-9299-A9FA54944A4C}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{A414521F-46F9-4C58-9299-A9FA54944A4C}.Release|Win32.ActiveCfg = Release|Win32
+		{A414521F-46F9-4C58-9299-A9FA54944A4C}.Release|Win32.Build.0 = Release|Win32
+		{A414521F-46F9-4C58-9299-A9FA54944A4C}.Release|x86.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
