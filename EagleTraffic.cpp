@@ -8,20 +8,102 @@ EagleTraffic::EagleTraffic(int type) {
 	_trafficLightType = type;
 }
 
+// helper function:
+// finds a cosine of angle between vectors
+// from pt0->pt1 and from pt0->pt2
+double EagleTraffic::_angle( cv::Point pt1, cv::Point pt2, cv::Point pt0 )
+{
+    double dx1 = pt1.x - pt0.x;
+    double dy1 = pt1.y - pt0.y;
+    double dx2 = pt2.x - pt0.x;
+    double dy2 = pt2.y - pt0.y;
+    return (dx1*dx2 + dy1*dy2)/sqrt((dx1*dx1 + dy1*dy1)*(dx2*dx2 + dy2*dy2) + 1e-10);
+}
+
+// returns sequence of squares detected on the image.
+// the sequence is stored in the specified memory storage
+void EagleTraffic::_findSquares( const cv::Mat& image, vector<vector<cv::Point> >& squares )
+{
+	int thresh = 50, N = 2;
+    squares.clear();
+    
+    vector<vector<cv::Point> > contours;
+	cv::Mat gray;
+	image.copyTo(gray);
+    
+    // find squares in every color plane of the image
+
+    // find contours and store them all as a list
+    findContours(gray, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
+
+    vector<cv::Point> approx;
+            
+    // test each contour
+    for( size_t i = 0; i < contours.size(); i++ )
+    {
+        // approximate contour with accuracy proportional
+        // to the contour perimeter
+        approxPolyDP(cv::Mat(contours[i]), approx, arcLength(cv::Mat(contours[i]), true)*0.02, true);
+                
+        // square contours should have 4 vertices after approximation
+        // relatively large area (to filter out noisy contours)
+        // and be convex.
+        // Note: absolute value of an area is used because
+        // area may be positive or negative - in accordance with the
+        // contour orientation
+        if( approx.size() == 4 &&
+            fabs(contourArea(cv::Mat(approx))) > 100 &&
+            isContourConvex(cv::Mat(approx)) )
+        {
+            double maxCosine = 0;
+
+            for( int j = 2; j < 5; j++ )
+            {
+                // find the maximum cosine of the angle between joint edges
+                double cosine = fabs(_angle(approx[j%4], approx[j-2], approx[j-1]));
+                maxCosine = MAX(maxCosine, cosine);
+            }
+
+            // if cosines of all angles are small
+            // (all angles are ~90 degree) then write quandrange
+            // vertices to resultant sequence
+            if( maxCosine < 0.3 )
+                squares.push_back(approx);
+        }
+    }
+}
+
+
+// the function draws all the squares in the image
+void EagleTraffic::_drawSquares( cv::Mat& image, const vector<vector<cv::Point> >& squares )
+{
+    for( size_t i = 0; i < squares.size(); i++ )
+    {
+        const cv::Point* p = &squares[i][0];
+        int n = (int)squares[i].size();
+        polylines(image, &p, &n, 1, true, cv::Scalar(255,255,0), 3, CV_AA);
+    }
+
+    imshow("squares", image);
+}
+
 int EagleTraffic::decideTrafficLight(const cv::Mat &image) {
 	if (image.empty()) return EAGLETRAFFIC_SIGN_NONE;
 
 	float radius;
 	cv::Point2f center;
+	cv::Mat H = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3, 3), cv::Point(1, 1));
 
 	float width, height;
 	
+	cv::Mat roi_image;
 	if (_trafficLightType == EAGLETRAFFIC_LIGHTTYPE_VERTICAL) {
-		current_frame = image(cvRect(((double)image.cols)/5.0*1.5, 0, ((double)image.cols)/5.0*3.5, image.rows/2));
+		roi_image = image(cvRect(((double)image.cols)/5.0*1.5, image.rows/5, ((double)image.cols)/5.0*3.5, image.rows/2));
 	}
 	else {
-		current_frame = image(cvRect(((double)image.cols)/5.0*0.5, 0, ((double)image.cols)/5.0*4.0, image.rows/2));
+		roi_image = image(cvRect(((double)image.cols)/5.0*0.5, 0, ((double)image.cols)/5.0*4.0, image.rows/2));
 	}
+	roi_image.copyTo(current_frame);
 
 	// Convert from BGR to HSV
 	cv::Mat hsvimage;
@@ -29,8 +111,19 @@ int EagleTraffic::decideTrafficLight(const cv::Mat &image) {
 	vector<cv::Mat> hsv;
 	split(hsvimage, hsv);
 	
+	/*cv::Mat square_bin;
+	inRange(hsv[2], 60, 256, square_bin);
+	dilate(square_bin, square_bin, H);
+	erode(square_bin, square_bin, H);
+	bitwise_not(square_bin, square_bin);
+	imshow("square_bin", square_bin);
+
+    vector<vector<cv::Point> > squares;
+    _findSquares(square_bin, squares);
+    _drawSquares(roi_image, squares);*/
+	
 	//cv::equalizeHist(hsv[0], hsv[0]);
-	cv::equalizeHist(hsv[2], hsv[2]);
+	//cv::equalizeHist(hsv[2], hsv[2]);
 	//cv::equalizeHist(hsv[1], hsv[1]);
 	
 	/*
@@ -91,13 +184,20 @@ int EagleTraffic::decideTrafficLight(const cv::Mat &image) {
 	inRange(hsv[0], 0, 55, hg1_bin); // Green Hue1
 	inRange(hsv[0], 95, 256, hg2_bin); // Green Hue2
 	max(hg1_bin, hg2_bin, hg_bin); // Green Hue(Final)
+	erode(hr_bin, hr_bin, H);
+	dilate(hr_bin, hr_bin, H);
+	erode(hg_bin, hg_bin, H);
+	dilate(hg_bin, hg_bin, H);
 
 	inRange(hsv[2], 0, 200, vr_bin); // Value
+	erode(vr_bin, vr_bin, H);
+	dilate(vr_bin, vr_bin, H);
 
 	// Saturation 추출
-	inRange(hsv[1], 0, 15, sr1_bin);
-	inRange(hsv[1], 241, 256, sr2_bin);
-	max(sr1_bin, sr2_bin, sr_bin); // Red Saturation(Final)
+	//inRange(hsv[1], 0, 15, sr1_bin);
+	//inRange(hsv[1], 241, 256, sr2_bin);
+	//max(sr1_bin, sr2_bin, sr_bin); // Red Saturation(Final)
+	inRange(hsv[1], 0, 60, sr_bin);
 	inRange(hsv[1], 0, 60, sg_bin); // Green Saturation
 
 	max(hr_bin, sr_bin, hsr_bin);
@@ -105,9 +205,9 @@ int EagleTraffic::decideTrafficLight(const cv::Mat &image) {
 	max(hg_bin, sg_bin, hsg_bin);
 	max(hsg_bin, vr_bin, hsvg_bin);
 
-	cv::Mat H = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3, 3), cv::Point(1, 1));
 	dilate(hsvr_bin, hsvr_bin, H);
 	dilate(hsvr_bin, hsvr_bin, H);
+	erode(hsvr_bin, hsvr_bin, H);
 	erode(hsvr_bin, hsvr_bin, H);
 	erode(hsvr_bin, hsvr_bin, H);
 	dilate(hsvg_bin, hsvg_bin, H);
@@ -115,12 +215,12 @@ int EagleTraffic::decideTrafficLight(const cv::Mat &image) {
 	erode(hsvg_bin, hsvg_bin, H);
 	erode(hsvg_bin, hsvg_bin, H);
 	
-	//imshow("hr_bin", hr_bin);
+	imshow("hr_bin", hr_bin);
 	imshow("hg_bin", hg_bin);
 	imshow("vr_bin", vr_bin);
-	//imshow("sr_bin", sr_bin);
+	imshow("sr_bin", sr_bin);
 	imshow("sg_bin", sg_bin);
-	//imshow("hsvr_bin", hsvr_bin);
+	imshow("hsvr_bin", hsvr_bin);
 	imshow("hsvg_bin", hsvg_bin);
 	imshow("hue", hsv[0]);
 	imshow("satuation", hsv[1]);
@@ -156,7 +256,7 @@ int EagleTraffic::decideTrafficLight(const cv::Mat &image) {
 			resultRect.height = ((double)resultRect.height * 0.8);
 			resultRect.x = (double)resultRect.x + ((double)testRect2.width * 0.1);
 			resultRect.y = (double)resultRect.y + ((double)testRect2.height * 0.1);
-			if (ratio < 0.7 || ratio > 1.3) continue;
+			if (ratio < 0.5 || ratio > 1.5) continue;
 			if (resultRect.width <= 4 || resultRect.width >= 40) continue;
 			if (resultRect.height <= 4 || resultRect.height >= 40) continue;
 
@@ -167,17 +267,21 @@ int EagleTraffic::decideTrafficLight(const cv::Mat &image) {
 
 			// 바이너리제이션 값 분석
 			// 적색 신호등 분석
-			int center_bin_count = countNonZero(vr_bin(resultRect));
-			if (center_bin_count > rectSize * 0.5) continue;
+			//int center_bin_count = countNonZero(vr_bin(resultRect));
+			//if (center_bin_count > rectSize * 0.5) continue;
+		
+			rectangle(roi_image, resultRect, cv::Scalar(255,255,0), 2, 8, 0);
 
 			// 신호등 아래쪽 분석
-			int bottom_bin_count = countNonZero(vr_bin(cvRect(resultRect.x, resultRect.y+resultRect.height, resultRect.width, resultRect.height)));
-			if (bottom_bin_count < rectSize * 0.5) continue;
+			//int bottom_bin_count = countNonZero(vr_bin(cvRect(resultRect.x, resultRect.y+resultRect.height, resultRect.width, resultRect.height)));
+			//if (bottom_bin_count < rectSize * 0.5) continue;
+
+			int center_value_count = cv::sum(hsv[2](cvRect(resultRect.x, resultRect.y, resultRect.width, resultRect.height)))[0];
 
 			// 명암 값 분석
 			// 신호등 아래쪽의 명암 총 합 계산
 			int bottom_value_count = cv::sum(hsv[2](cvRect(resultRect.x, resultRect.y+resultRect.height, resultRect.width, resultRect.height)))[0];
-			if (bottom_value_count > rectSize * 128) continue;
+			if (bottom_value_count > center_value_count * 1.2) continue;
 
 			// 신호등 왼쪽의 명암 총 합 계산
 			int left_value_count = cv::sum(hsv[2](cvRect(resultRect.x-resultRect.width, resultRect.y, resultRect.width, resultRect.height)))[0];
@@ -190,8 +294,9 @@ int EagleTraffic::decideTrafficLight(const cv::Mat &image) {
 			// 신호등 위쪽의 명암 총 합 계산
 			int top_value_count = cv::sum(hsv[2](cvRect(resultRect.x, resultRect.y-resultRect.height, resultRect.width, resultRect.height)))[0];
 			if (top_value_count < bottom_value_count * 1.5) continue;
-
-			//rectangle(current_frame, resultRect, cv::Scalar(0,0,255), 2, 8, 0);
+			
+			rectangle(roi_image, cvRect(resultRect.x-1, resultRect.y-1, resultRect.width+2, resultRect.height*2+2), cv::Scalar(0,255,255), 2, 8, 0);
+			rectangle(current_frame, resultRect, cv::Scalar(0,0,255), 2, 8, 0);
 
 			redpos += rectSize;
 		}
@@ -212,7 +317,6 @@ int EagleTraffic::decideTrafficLight(const cv::Mat &image) {
 		resultRect.height = ((double)resultRect.height * 0.8);
 		resultRect.x = (double)resultRect.x + ((double)testRect2.width * 0.1);
 		resultRect.y = (double)resultRect.y + ((double)testRect2.height * 0.1);
-			//rectangle(current_frame, resultRect, cv::Scalar(0,255,0), 2, 8, 0);
 		if (ratio < 0.7 || ratio > 1.3) continue;
 		if (resultRect.width <= 3 || resultRect.width >= 40) continue;
 		if (resultRect.height <= 3 || resultRect.height >= 40) continue;
@@ -224,19 +328,21 @@ int EagleTraffic::decideTrafficLight(const cv::Mat &image) {
 
 		// 바이너리제이션 값 분석
 		// 녹색 신호등 분석
-		int center_bin_count = countNonZero(vr_bin(resultRect));
-		if (center_bin_count > rectSize * 0.5) continue;
+		//int center_bin_count = countNonZero(vr_bin(resultRect));
+		//if (center_bin_count > rectSize * 0.5) continue;
+		
+		rectangle(roi_image, resultRect, cv::Scalar(255,255,0), 2, 8, 0);
 
 		if (_trafficLightType == EAGLETRAFFIC_LIGHTTYPE_VERTICAL) {
 
 			// 신호등 위쪽 분석
-			int top_bin_count = countNonZero(vr_bin(cvRect(resultRect.x, resultRect.y-resultRect.height, resultRect.width, resultRect.height)));
-			if (top_bin_count < rectSize * 0.5) continue;
+			//int top_bin_count = countNonZero(vr_bin(cvRect(resultRect.x, resultRect.y-resultRect.height, resultRect.width, resultRect.height)));
+			//if (top_bin_count < rectSize * 0.5) continue;
 
 			// 명암 값 분석
 			// 신호등 위쪽의 명암 총 합 계산
 			int top_value_count = cv::sum(hsv[2](cvRect(resultRect.x, resultRect.y-resultRect.height, resultRect.width, resultRect.height)))[0];
-			if (top_value_count > rectSize * 64) continue;
+			if (top_value_count > rectSize * 96) continue;
 
 			// 신호등 왼쪽의 명암 총 합 계산
 			int left_value_count = cv::sum(hsv[2](cvRect(resultRect.x-resultRect.width, resultRect.y, resultRect.width, resultRect.height)))[0];
@@ -249,12 +355,14 @@ int EagleTraffic::decideTrafficLight(const cv::Mat &image) {
 			// 신호등 아래쪽의 명암 총 합 계산
 			int bottom_value_count = cv::sum(hsv[2](cvRect(resultRect.x, resultRect.y+resultRect.height, resultRect.width, resultRect.height)))[0];
 			if (bottom_value_count < top_value_count * 1.2) continue;
-
+			
+			rectangle(roi_image, cvRect(resultRect.x-1, resultRect.y-resultRect.height-1, resultRect.width+2, resultRect.height*2+2), cv::Scalar(0,255,255), 2, 8, 0);
+			rectangle(roi_image, resultRect, cv::Scalar(0,255,0), 2, 8, 0);
 
 			greenpos += rectSize;
 		}
 		else {
-			//rectangle(current_frame, resultRect, cv::Scalar(0,255,0), 2, 8, 0);
+			rectangle(current_frame, resultRect, cv::Scalar(0,255,0), 2, 8, 0);
 
 			int direction = 0;
 			// 신호등 왼쪽 분석
@@ -274,6 +382,9 @@ int EagleTraffic::decideTrafficLight(const cv::Mat &image) {
 			}
 		}
 	}
+	
+	//imshow("original_frame", current_frame);
+
 
 	if (_trafficLightType == EAGLETRAFFIC_LIGHTTYPE_VERTICAL) {
 		if (greenpos > redpos && greenpos >= 50) return EAGLETRAFFIC_SIGN_GREEN; //cout << "GREEN SIGN" << endl;
