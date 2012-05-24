@@ -89,6 +89,7 @@
     <ClInclude Include="..\..\AVCData.h" />
     <ClInclude Include="..\..\AVCNetwork.h" />
     <ClInclude Include="..\..\AVCTimeProfiler.h" />
+    <ClInclude Include="..\..\EagleCrosswalk.h" />
     <ClInclude Include="..\..\EagleTraffic.h" />
     <ClInclude Include="..\..\global.h" />
     <ClInclude Include="..\..\LaneDetector.h" />
@@ -100,6 +101,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\AVCNetwork.cpp" />
     <ClCompile Include="..\..\AVCTimeProfiler.cpp" />
+    <ClCompile Include="..\..\EagleCrosswalk.cpp" />
     <ClCompile Include="..\..\EagleTraffic.cpp" />
     <ClCompile Include="..\..\LaneDetector.cpp" />
     <ClCompile Include="..\..\main.cpp" />

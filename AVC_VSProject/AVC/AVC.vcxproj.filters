@@ -47,6 +47,9 @@
       <Filter>DetectionModule</Filter>
     </ClInclude>
     <ClInclude Include="..\..\AVCData.h" />
+    <ClInclude Include="..\..\EagleCrosswalk.h">
+      <Filter>DetectionModule</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -69,6 +72,9 @@
     </ClCompile>
     <ClCompile Include="..\..\main.cpp" />
     <ClCompile Include="..\..\EagleTraffic.cpp">
+      <Filter>DetectionModule</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\EagleCrosswalk.cpp">
       <Filter>DetectionModule</Filter>
     </ClCompile>
   </ItemGroup>
