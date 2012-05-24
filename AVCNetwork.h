@@ -14,53 +14,35 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef MAC_OS_X_VERSION_10_7
+#ifdef WIN32
+	// 인클루드 순서가 중요하다. winsock2 -> windows순으로 적을것.
+	#include <winsock2.h>
+	#include <windows.h> //gpuMat의 min 함수와 윈도우즈 매크로가 충돌한다.
+
+	#define NET_INVALID_SOCKET	INVALID_SOCKET
+	#define NET_SOCKET_ERROR SOCKET_ERROR
+	typedef int socklen_t; // Unix 타입은 unsigned int Windows 는 int
+
+#else
+
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <time.h>
-#else
-//#include <windows.h>
-//gpuMat의 min 함수와 윈도우즈 매크로가 충돌한다.
-//#include <winsock2.h>
+
+typedef int SOCKET;
+#define NET_INVALID_SOCKET	-1
+#define NET_SOCKET_ERROR -1
+
 #endif
 
 
 
 #include <queue>
-
+#include "AVCData.h"
 #define BUF_SIZE 1024
 
-// 차선 상태의 유효성 변수 날려주기
-enum AVCLaneValid{
-    LaneValid_LeftRight =1,
-    LaneValid_Right     =2,
-    LaneValid_Left      =3,
-    LaneValid_None      =4
-};
 
-// 현재 신호등 정보 보내기
-enum AVCTrafficSign{
-    TrafficSign_TurnLeft    =1,
-    TrafficSign_TurnRight   =2,
-    TrafficSign_Stop        =3,
-    TrafficSign_Go          =4
-};
-
-typedef struct 
-{
-    
-    float marginLeft;
-    float marginRight;
-    int laneValidity;
-    float steering; // 조향각
-    float angleLeft; // 이건 필요없을지도 모르겠네.
-	float angleRight;
-    
-	int trafficSign;
-	//time_t timeStamp; // time_t == long
-	
-} AVCData;
 
 
 class AVCNetwork
@@ -75,21 +57,25 @@ public:
     void addToQueue(AVCData data);
     
 protected:
-    void convertDataToNetworkOrder(AVCData& aData);
+
     
     void workerThread();
     
-    float htohFloat(float fVal);
     void error_handling(const char *message);
 
     
     bool isConnected;
     bool isStopFlagOn;
     
-    int serverSocket, clientSocket;
+    SOCKET serverSocket, clientSocket;
     int retryTimeInterval;
 	
 	std::queue<AVCData> dataQueue;
+
+#ifdef WIN32
+	WSADATA wsaData;
+#endif 
+	
 };
 
 

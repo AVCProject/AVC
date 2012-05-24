@@ -10,7 +10,13 @@
 #include <iostream>
 #include <boost/thread.hpp>
 
-//MOD:현재 맥에서만 동작하기 때문에 막아뒀음.
+
+#ifdef WIN32
+	#pragma comment (lib, "ws2_32.lib")
+	#define CLOSE(socket) closesocket(socket)
+#else
+	#define CLOSE(socket) close(socket)
+#endif
 
 
 AVCNetwork::AVCNetwork()
@@ -29,47 +35,50 @@ AVCNetwork::~AVCNetwork()
 
 bool AVCNetwork::init(unsigned short port)
 {	
-	/*
+	if( WSAStartup(MAKEWORD(2,2),&wsaData) != 0)
+		error_handling("WSAStartup() failed.");
+		
+
 	struct sockaddr_in serverAddr;
-	
+
 	serverSocket=socket(PF_INET, SOCK_STREAM, 0);   
 	if(serverSocket==-1)
 		error_handling("socket() error");
-	p
+	
 	memset(&serverAddr, 0, sizeof(serverAddr));
 	serverAddr.sin_family=AF_INET;
 	serverAddr.sin_addr.s_addr=htonl(INADDR_ANY);
 	serverAddr.sin_port=htons(port);
 	
     // prevent bind error
-    int nSockOpt = 1;
+#ifdef WIN32
+	char nSockOpt = 1;
+#else
+	int nSockOpt = 1;
+#endif
     setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &nSockOpt, sizeof(nSockOpt));
     
 	if(bind(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr))==-1)
 	{
 		error_handling("bind() error");
-		close(serverSocket);
+		CLOSE(serverSocket);
 	}
 	
 	if(listen(serverSocket, 5)==-1)
 		error_handling("listen() error");
     
     
-	*/
+	
     return true;
 	
 }
 void AVCNetwork::workerThread()
 {
     // 연결 받기 기다리는 루프
-	/*
+	
 	while (1)
 	{
-		
-		printf("Unit Sizes:float%lu,int%lu,time_t%lu,",sizeof(float),sizeof(int),sizeof(time_t));
-		printf("Data Size:%lu\n",sizeof(AVCData));
-        
-		printf("Waiting for connection from clients...\n");
+		printf("VisionServer Waiting for connection from clients...\n");
 		
         struct sockaddr_in clientAddr;
         socklen_t clientAddr_sz;
@@ -91,7 +100,7 @@ void AVCNetwork::workerThread()
             if (dataQueue.size() < 1) 
             {
                 printf("No data to send in queue\n");
-                usleep(20000);
+            	boost::this_thread::sleep(boost::posix_time::millisec(20));
                 continue;
             }
             
@@ -99,24 +108,21 @@ void AVCNetwork::workerThread()
             dataQueue.pop();
             
             
-            convertDataToNetworkOrder(data);
+            convertDataToNetworkOrder(&data);
             
-            if( send(clientSocket, &data, sizeof(AVCData), 0) == -1 )
+#ifdef WIN32
+            if( send(clientSocket, (const char*)&data, sizeof(AVCData), 0) == -1 )
+#else
+			if( send(clientSocket, &data, sizeof(AVCData), 0) == -1 )
+#endif
             {
                 // 전송 에러 발생 처리
                 printf("send error occured\n");
                 break;
             }
             
-            printf("20ms elapsed: marginL:%f,marginR:%f,validity:%d, steer:%f, angleL:%f, angleR:%f, sign:%d\n",
-                   data.marginLeft,
-                   data.marginRight,
-                   data.laneValidity,
-                   data.steering,
-                   data.angleLeft,
-                   data.angleRight,
-                   data.trafficSign);
-            //printf("200ms elapsed: angleL:%f, angleR:%f, Offset:%f, sign:%d, TS%d\n",data.angleLeft,data.angleRight,data.lateralOffset,data.trafficSign,data.timeStamp);
+			printAVCData(&data);
+            
             
             if(isStopFlagOn)
                 break;
@@ -127,14 +133,17 @@ void AVCNetwork::workerThread()
         
         
 		
-		close(clientSocket);
-        
+		CLOSE(clientSocket);
+  
 		// 컨넥션이 끊어졌을 경우 1초 기다렸다가 다시 accept 시도
-		sleep(retryTimeInterval);
+		boost::this_thread::sleep(boost::posix_time::seconds(retryTimeInterval));
 	}
     
-    close(serverSocket);
-	*/
+    CLOSE(serverSocket);
+#ifdef WIN32
+	WSACleanup();
+#endif
+	
 }
 void AVCNetwork::start()
 {
@@ -145,37 +154,12 @@ void AVCNetwork::stop()
 {
     isStopFlagOn = true;
 }
-void AVCNetwork::convertDataToNetworkOrder(AVCData& aData)
-{
-    //time(&data.timeStamp);
-	/*
-    aData.marginLeft = htohFloat(aData.marginLeft);
-    aData.marginRight = htohFloat(aData.marginRight);    
-    aData.laneValidity =htonl(aData.laneValidity);
-    aData.steering = htohFloat(aData.steering);
-    
-    aData.angleLeft = htohFloat(aData.angleLeft);
-    aData.angleRight = htohFloat(aData.angleRight);
 
-    aData.trafficSign = htonl(aData.trafficSign);
-	*/
-}
 void AVCNetwork::addToQueue(AVCData aData)
 {
     dataQueue.push(aData);
 }
 
-// float형을 네트워크 바이트 오더링으로 변경
-float AVCNetwork::htohFloat(float fVal)
-{
-	/*
-	unsigned long *puifVal = (unsigned long *)&fVal;    // float를 unsigned long 캐스팅.
-	
-	*puifVal = ntohl(*puifVal);	// ntohl(htonl) 함수 이용
-	*/
-	return fVal;
-	
-}
 void AVCNetwork::error_handling(const char *message)
 {
 	fputs(message, stderr);

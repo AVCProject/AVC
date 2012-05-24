@@ -46,6 +46,7 @@
     <ClInclude Include="..\..\EagleTraffic.h">
       <Filter>DetectionModule</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\AVCData.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
