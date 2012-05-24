@@ -31,11 +31,6 @@ public:
 private:
 	cv::Mat current_frame;
 	int _trafficLightType;
-
-	void _findSquares( const cv::Mat& image, vector<vector<cv::Point> >& squares );
-	void _drawSquares( cv::Mat& image, const vector<vector<cv::Point> >& squares );
-	double _angle( cv::Point pt1, cv::Point pt2, cv::Point pt0 );
-
 };
 
 #endif

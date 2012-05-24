@@ -215,7 +215,7 @@ int EagleTraffic::decideTrafficLight(const cv::Mat &image) {
 	erode(hsvg_bin, hsvg_bin, H);
 	erode(hsvg_bin, hsvg_bin, H);
 	
-	/*imshow("hr_bin", hr_bin);
+	imshow("hr_bin", hr_bin);
 	imshow("hg_bin", hg_bin);
 	imshow("vr_bin", vr_bin);
 	imshow("sr_bin", sr_bin);
@@ -224,7 +224,7 @@ int EagleTraffic::decideTrafficLight(const cv::Mat &image) {
 	imshow("hsvg_bin", hsvg_bin);
 	imshow("hue", hsv[0]);
 	imshow("satuation", hsv[1]);
-	imshow("value", hsv[2]);*/
+	imshow("value", hsv[2]);
 	
 
 	
@@ -270,7 +270,7 @@ int EagleTraffic::decideTrafficLight(const cv::Mat &image) {
 			//int center_bin_count = countNonZero(vr_bin(resultRect));
 			//if (center_bin_count > rectSize * 0.5) continue;
 		
-			rectangle(current_frame, resultRect, cv::Scalar(255,255,0), 2, 8, 0);
+			rectangle(roi_image, resultRect, cv::Scalar(255,255,0), 2, 8, 0);
 
 			// 신호등 아래쪽 분석
 			//int bottom_bin_count = countNonZero(vr_bin(cvRect(resultRect.x, resultRect.y+resultRect.height, resultRect.width, resultRect.height)));
@@ -295,7 +295,7 @@ int EagleTraffic::decideTrafficLight(const cv::Mat &image) {
 			int top_value_count = cv::sum(hsv[2](cvRect(resultRect.x, resultRect.y-resultRect.height, resultRect.width, resultRect.height)))[0];
 			if (top_value_count < bottom_value_count * 1.5) continue;
 			
-			rectangle(current_frame, cvRect(resultRect.x-1, resultRect.y-1, resultRect.width+2, resultRect.height*2+2), cv::Scalar(0,255,255), 2, 8, 0);
+			rectangle(roi_image, cvRect(resultRect.x-1, resultRect.y-1, resultRect.width+2, resultRect.height*2+2), cv::Scalar(0,255,255), 2, 8, 0);
 			rectangle(current_frame, resultRect, cv::Scalar(0,0,255), 2, 8, 0);
 
 			redpos += rectSize;
@@ -383,7 +383,7 @@ int EagleTraffic::decideTrafficLight(const cv::Mat &image) {
 		}
 	}
 	
-	imshow("traffic_frame", current_frame);
+	//imshow("original_frame", current_frame);
 
 
 	if (_trafficLightType == EAGLETRAFFIC_LIGHTTYPE_VERTICAL) {
