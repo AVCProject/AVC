@@ -28,6 +28,7 @@ typedef struct
 	float angleRight;
 
 	int trafficSign;
+	int crosswalkPos;
 	int isPedDetected;
 	float pedDistance;
 	//time_t timeStamp;	
@@ -37,7 +38,7 @@ static void printAVCData(AVCData *data)
 {
 	printf("\
 [Lane]\tvalid:%d,mL:%0.0f,mR:%0.0f, angleL:%0.0f, angleR:%0.0f, \n\
-[Sign]\t%d\n\
+[Sign]\t%d\t[Crosswalk]\t%d\n\
 [Ped]\t%s, Dist:%0.0f\n",
 		   data->laneValidity,
 		   data->marginLeft,
@@ -45,6 +46,7 @@ static void printAVCData(AVCData *data)
 		   data->angleLeft,
 		   data->angleRight,
 		   data->trafficSign,
+		   data->crosswalkPos,
 		   (data->isPedDetected) ? "O":"X",
 		   data->pedDistance);
 

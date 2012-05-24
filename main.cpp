@@ -21,6 +21,7 @@
 #include "LaneDetector.h"
 #include "PedDetector.h"
 #include "EagleTraffic.h"
+#include "EagleCrosswalk.h"
 
 #include "AVCTimeProfiler.h"
 #include "AVCNetwork.h" // 인클루드 순서가 중요하다. opencv_gpu모듈이 인클루드 된 후에 적어줄것.
@@ -81,6 +82,7 @@ int main (int argc, char * const argv[])
     //RoadAreaDetector *roadAreaDetector = new RoadAreaDetector("RoadAreaDetector");
     PedDetector *pedDetector = new PedDetector("PedDetector");
 	EagleTraffic *trafficDetector = new EagleTraffic(EAGLETRAFFIC_LIGHTTYPE_VERTICAL);
+	EagleCrosswalk *crosswalkDetector = new EagleCrosswalk;
     
 	int frameCnt = 0;
 	AVCData avcData;
@@ -141,6 +143,7 @@ int main (int argc, char * const argv[])
 			
 
 			int trafficSign = trafficDetector->decideTrafficLight(current_frame);
+			int crosswalkPos = crosswalkDetector->decideCrosswalk(current_frame);
 
 			// ROI 부분의 레퍼런스만 갖고가기때문에 실제 current_frame위에 사각형 그려진다.
 			pedDetector->runModule(current_frame, cv::Rect(320,170,current_frame.cols-320,current_frame.rows-170-100));
@@ -157,6 +160,7 @@ int main (int argc, char * const argv[])
                 avcData.marginRight = 20;
                 avcData.laneValidity = 5;   
                 avcData.trafficSign = trafficSign;
+				avcData.crosswalkPos = crosswalkPos;
 //				avcData.angleLeft = laneDetector->angleLeft;
 	//			avcData.angleRight = laneDetector->angleRight;
                 avcData.trafficSign = 1;
