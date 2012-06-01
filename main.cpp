@@ -46,7 +46,7 @@ int main (int argc, char * const argv[])
     bool isSourceLive = false;
 	//char filePath[] = "curve_test.avi";
     //char filePath[] = "C:\\AVCData\\1322203220.avi";
-    char filePath[] = "c:\\AVC_Output\\AVC_Data\\ped1.avi";
+    char filePath[] = "c:\\AVC_Output\\AVC_Data\\b2.avi";
 	AVCNetwork *netModule = NULL;
     
 	if (isNetworkOn) 
@@ -135,7 +135,7 @@ int main (int argc, char * const argv[])
 			//laneDetector->runModule(current_frame, cv::Rect(232,0,261,current_frame.rows));
             
             // 디텍팅 시작
-            //AVCTimeProfiler::begin();
+            AVCTimeProfiler::begin();
 			
             //laneDetector->runModule(current_frame, cv::Rect(0,310,current_frame.cols,current_frame.rows-310));
             
@@ -151,10 +151,38 @@ int main (int argc, char * const argv[])
 			imshow("Original",current_frame);
 
 			//cout << "current frame" << frameCnt << endl;
-           //AVCTimeProfiler::end();
+           AVCTimeProfiler::end();
             
+		   if(pedDetector->isFound)
+		   {
+			   avcData.missonID = 10;
+			   avcData.value1 = pedDetector->distance;
+			   avcData.value2 = -1;
+		   }
+		   else if (trafficSign == EAGLETRAFFIC_SIGN_RED || trafficSign == EAGLETRAFFIC_SIGN_GREEN)
+		   {
+			   avcData.missonID = 20;
+			   avcData.value1 = trafficSign ;
+			   avcData.value2 = crosswalkPos; // MOD: 미터로 환산할것
+		   }
+		   else if (trafficSign == EAGLETRAFFIC_SIGN_LEFT || trafficSign == EAGLETRAFFIC_SIGN_RIGHT)
+		   {
+			   avcData.missonID = 30;
+			   avcData.value1 = trafficSign ;
+			   avcData.value2 = -1;
+		   }
+		   else
+		   {
+			   avcData.missonID = 0;
+			   avcData.value1 = -1;
+			   avcData.value2 = -1;
+		   }
+
+
             if( isNetworkOn )
             {
+				
+				/*
 				// 결과 데이터 패키징해서 전송
                 avcData.marginLeft = 10;
                 avcData.marginRight = 20;
@@ -166,7 +194,7 @@ int main (int argc, char * const argv[])
                 avcData.trafficSign = 1;
 				avcData.isPedDetected = pedDetector->isFound;
 				avcData.pedDistance = pedDetector->distance;
-                
+                */
                 
                 netModule->addToQueue(avcData);
             }

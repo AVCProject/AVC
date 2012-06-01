@@ -138,7 +138,7 @@ int EagleCrosswalk::decideCrosswalk(const cv::Mat &image) {
 		for (int j=0; j<itemlist.size(); j++) {
 			rectangle(current_frame, cwitems[itemlist[j]], cv::Scalar(255,255,0), 2, 8, 0);
 		}
-		cout << mindist << " " << maxdist << endl;
+		//cout << mindist << " " << maxdist << endl;
 	}
 	imshow("finalframe", current_frame);
 
