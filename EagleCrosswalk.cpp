@@ -1,6 +1,8 @@
 #include "EagleCrosswalk.h"
 
 EagleCrosswalk::EagleCrosswalk() {
+	previous_pos = -1;
+	previous_value = 0;
 }
 
 int EagleCrosswalk::decideCrosswalk(const cv::Mat &image) {
@@ -13,7 +15,8 @@ int EagleCrosswalk::decideCrosswalk(const cv::Mat &image) {
 	float width, height;
 	
 	cv::Mat roi_image;
-	roi_image = image(cvRect(0, image.rows/2, image.cols, image.rows/10*4));
+	int y_startpos = image.rows*11/17;
+	roi_image = image(cvRect(0, y_startpos, image.cols*3/4, image.rows*4/17));
 	roi_image.copyTo(current_frame);
 
 	// Convert from BGR to HSV
@@ -59,8 +62,9 @@ int EagleCrosswalk::decideCrosswalk(const cv::Mat &image) {
 	dilate(bin_com, bin_com, H);
 	erode(bin_com, bin_com, H);
 	erode(bin_com, bin_com, H);
+	erode(bin_com, bin_com, H);
 
-	imshow("final", bin_com);
+	//imshow("final", bin_com);
 
 	vector<vector<cv::Point> > contours;
 	vector<cv::Vec4i> hierarchy;
@@ -68,6 +72,10 @@ int EagleCrosswalk::decideCrosswalk(const cv::Mat &image) {
 	vector<CvRect> cwitems;
 
 	int retvalue = -1;
+	int retposition = -1;
+
+	int maxvalue = 0;
+	int maxposition = -1;
 
 	findContours(bin_com, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
 	for (int i=0; i<contours.size(); i++) {
@@ -97,8 +105,12 @@ int EagleCrosswalk::decideCrosswalk(const cv::Mat &image) {
 		int mindist = -1;
 		int maxdist = 1000000;
 		int ypos = 0;
+		int xpos = 0;
+		int avgsize = 0;
 		for (int j=0; j<itemlist.size(); j++) {
 			ypos += (cwitems[itemlist[j]].y+cwitems[itemlist[j]].height);
+			xpos += (cwitems[itemlist[j]].x+cwitems[itemlist[j]].width/2);
+			avgsize += (cwitems[itemlist[j]].width * cwitems[itemlist[j]].height);
 			
 			int localmindistl = -1;
 			int localmindistr = -1;
@@ -130,17 +142,51 @@ int EagleCrosswalk::decideCrosswalk(const cv::Mat &image) {
 			}
 		}
 
+		xpos = xpos/itemlist.size();
+		avgsize = avgsize/itemlist.size();
+
 		//cout << mindist << " " << maxdist << endl;
 		if ((maxdist-mindist) > maxdist/2) continue;
+		if (xpos < image.cols/3 || xpos > image.cols*2/3) continue;
 
-		retvalue = ypos/itemlist.size();
+		retposition = ypos/itemlist.size();
+		retposition += y_startpos; // ROI가 위치하는 실제 위치를 계산
+
+		// 이전 결과 반영
+		if (previous_pos == -1 || ((retposition - previous_pos) > -4 && (retposition - previous_pos) < 8)) {
+			retvalue = previous_value;
+		} else {
+			retvalue = 0;
+		}
+
+		retvalue += (image.cols-(maxdist-mindist)); // 최대간격과 최소간격의 차이
+		retvalue += (image.cols-abs(xpos-(image.cols/2))); // 중간 x좌표와 이미지의 중간 x좌표와의 차이
+		retvalue += (avgsize*4);
+
+		if (retvalue > maxvalue) {
+			maxvalue = retvalue;
+			maxposition = retposition;
+		}
 
 		for (int j=0; j<itemlist.size(); j++) {
 			rectangle(current_frame, cwitems[itemlist[j]], cv::Scalar(255,255,0), 2, 8, 0);
 		}
-		cout << mindist << " " << maxdist << endl;
+		//cout << mindist << " " << maxdist << endl;
 	}
-	imshow("finalframe", current_frame);
+	//imshow("finalframe", current_frame);
 
-	return retvalue;
+	// 계산 결과 반영
+	if (maxposition != -1) {
+		previous_pos = maxposition;
+		previous_value = maxvalue;
+	} else {
+		previous_value -= (previous_value/2 + 10);
+	}
+
+	if (previous_value <= 0) {
+		previous_pos = -1;
+		previous_value = 0;
+	}
+
+	return previous_value;
 }

@@ -2,10 +2,18 @@
 
 EagleTraffic::EagleTraffic() {
 	_trafficLightType = EAGLETRAFFIC_LIGHTTYPE_VERTICAL;
+	red_previous_pos = -1;
+	red_previous_value = 0;
+	green_previous_pos = -1;
+	green_previous_value = 0;
 }
 
 EagleTraffic::EagleTraffic(int type) {
 	_trafficLightType = type;
+	red_previous_pos = -1;
+	red_previous_value = 0;
+	green_previous_pos = -1;
+	green_previous_value = 0;
 }
 
 // helper function:
@@ -87,7 +95,7 @@ void EagleTraffic::_drawSquares( cv::Mat& image, const vector<vector<cv::Point> 
     imshow("squares", image);
 }
 
-int EagleTraffic::decideTrafficLight(const cv::Mat &image) {
+int EagleTraffic::decideTrafficLight(const cv::Mat &image, int crosswalk_value) {
 	if (image.empty()) return EAGLETRAFFIC_SIGN_NONE;
 
 	float radius;
@@ -184,8 +192,15 @@ int EagleTraffic::decideTrafficLight(const cv::Mat &image) {
 	inRange(hsv[0], 0, 55, hg1_bin); // Green Hue1
 	inRange(hsv[0], 95, 256, hg2_bin); // Green Hue2
 	max(hg1_bin, hg2_bin, hg_bin); // Green Hue(Final)
+	dilate(hr_bin, hr_bin, H);
+	dilate(hr_bin, hr_bin, H);
+	erode(hr_bin, hr_bin, H);
+	erode(hr_bin, hr_bin, H);
+	erode(hr_bin, hr_bin, H);
 	erode(hr_bin, hr_bin, H);
 	dilate(hr_bin, hr_bin, H);
+	dilate(hr_bin, hr_bin, H);
+
 	erode(hg_bin, hg_bin, H);
 	dilate(hg_bin, hg_bin, H);
 
@@ -210,6 +225,7 @@ int EagleTraffic::decideTrafficLight(const cv::Mat &image) {
 	erode(hsvr_bin, hsvr_bin, H);
 	erode(hsvr_bin, hsvr_bin, H);
 	erode(hsvr_bin, hsvr_bin, H);
+
 	dilate(hsvg_bin, hsvg_bin, H);
 	dilate(hsvg_bin, hsvg_bin, H);
 	erode(hsvg_bin, hsvg_bin, H);
@@ -237,6 +253,11 @@ int EagleTraffic::decideTrafficLight(const cv::Mat &image) {
 	findContours(hsvg_bin, contoursg, hierarchyg, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
 	
 	//imshow("vr_bin", vr_bin);
+
+	int max_red_pos = -1;
+	int max_red_value = 0;
+	int max_green_pos = -1;
+	int max_green_value = 0;
 	
 
 	// Detect traffic light(red)
@@ -294,11 +315,36 @@ int EagleTraffic::decideTrafficLight(const cv::Mat &image) {
 			// 신호등 위쪽의 명암 총 합 계산
 			int top_value_count = cv::sum(hsv[2](cvRect(resultRect.x, resultRect.y-resultRect.height, resultRect.width, resultRect.height)))[0];
 			if (top_value_count < bottom_value_count * 1.5) continue;
+
+			// 신호등 주변의 Hue값 분포 분석
+			//int near_hue_count = (rectSize*9)-countNonZero(hr_bin(cvRect(resultRect.x-resultRect.width, resultRect.y-resultRect.height, resultRect.width*3, resultRect.height*2)));
+			//int center_hue_count = rectSize-countNonZero(hr_bin(resultRect));
+			//if ((near_hue_count-center_hue_count) > center_hue_count*2) continue;
+			//cout << near_hue_count << " " << center_hue_count << endl;
 			
 			rectangle(current_frame, cvRect(resultRect.x-1, resultRect.y-1, resultRect.width+2, resultRect.height*2+2), cv::Scalar(0,255,255), 2, 8, 0);
 			rectangle(current_frame, resultRect, cv::Scalar(0,0,255), 2, 8, 0);
 
+			int current_pos = resultRect.y+resultRect.height/2;
+
+			// 이전 결과 반영
+			if (red_previous_pos == -1 || ((current_pos - red_previous_pos) > -4 && (current_pos - red_previous_pos) < 10)) {
+				redpos = red_previous_value;
+			} else {
+				redpos = 0;
+			}
+
 			redpos += rectSize;
+
+			// 횡단보도 가중치 부여
+			if (crosswalk_value >= CROSSWALK_THRESHOLD) {
+				redpos += ((crosswalk_value-CROSSWALK_THRESHOLD)*2);
+			}
+
+			if (redpos > max_red_value) {
+				max_red_value = redpos;
+				max_red_pos = current_pos;
+			}
 		}
 	}
 
@@ -358,8 +404,27 @@ int EagleTraffic::decideTrafficLight(const cv::Mat &image) {
 			
 			rectangle(roi_image, cvRect(resultRect.x-1, resultRect.y-resultRect.height-1, resultRect.width+2, resultRect.height*2+2), cv::Scalar(0,255,255), 2, 8, 0);
 			rectangle(roi_image, resultRect, cv::Scalar(0,255,0), 2, 8, 0);
+			
+			int current_pos = resultRect.y+resultRect.height/2;
+
+			// 이전 결과 반영
+			if (green_previous_pos == -1 || ((current_pos - green_previous_pos) > -4 && (current_pos - green_previous_pos) < 10)) {
+				greenpos = green_previous_value;
+			} else {
+				greenpos = 0;
+			}
 
 			greenpos += rectSize;
+
+			// 횡단보도 가중치 부여
+			if (crosswalk_value >= CROSSWALK_THRESHOLD) {
+				greenpos += (crosswalk_value-CROSSWALK_THRESHOLD)*2;
+			}
+
+			if (greenpos > max_green_value) {
+				max_green_value = greenpos;
+				max_green_pos = current_pos;
+			}
 		}
 		else {
 			rectangle(current_frame, resultRect, cv::Scalar(0,255,0), 2, 8, 0);
@@ -383,12 +448,40 @@ int EagleTraffic::decideTrafficLight(const cv::Mat &image) {
 		}
 	}
 	
-	imshow("traffic_frame", current_frame);
+	//imshow("traffic_frame", current_frame);
 
 
 	if (_trafficLightType == EAGLETRAFFIC_LIGHTTYPE_VERTICAL) {
-		if (greenpos > redpos && greenpos >= 50) return EAGLETRAFFIC_SIGN_GREEN; //cout << "GREEN SIGN" << endl;
-		else if (redpos >= 50) return EAGLETRAFFIC_SIGN_RED; //cout << "RED SIGN" << endl;
+		// 계산 결과 반영
+		if (max_red_pos != -1) {
+			red_previous_pos = max_red_pos;
+			red_previous_value = max_red_value;
+		} else {
+			red_previous_value -= (red_previous_value*2/5 + 10);
+		}
+
+		if (red_previous_value <= 0) {
+			red_previous_pos = -1;
+			red_previous_value = 0;
+		}
+
+		// 계산 결과 반영
+		if (max_green_pos != -1) {
+			green_previous_pos = max_green_pos;
+			green_previous_value = max_green_value;
+		} else {
+			green_previous_value -= (green_previous_value*2/5 + 10);
+		}
+
+		if (green_previous_value <= 0) {
+			green_previous_pos = -1;
+			green_previous_value = 0;
+		}
+
+		//cout << red_previous_value << " " << green_previous_value << endl;
+
+		if (green_previous_value > red_previous_value && green_previous_value >= 200) return EAGLETRAFFIC_SIGN_GREEN; //cout << "GREEN SIGN" << endl;
+		else if (red_previous_value >= 200) return EAGLETRAFFIC_SIGN_RED; //cout << "RED SIGN" << endl;
 		else return EAGLETRAFFIC_SIGN_NONE; //cout << "X" << endl;
 	}
 	else {

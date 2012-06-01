@@ -10,6 +10,8 @@
 #include <vector>
 using namespace std;
 
+#define CROSSWALK_THRESHOLD	3500
+
 // Traffic light values
 #define EAGLETRAFFIC_SIGN_NONE		0
 #define	EAGLETRAFFIC_SIGN_RED		1
@@ -26,11 +28,15 @@ class EagleTraffic {
 public:
 	EagleTraffic();
 	EagleTraffic(int type);
-	int decideTrafficLight(const cv::Mat &image); // return traffic light value of the image
+	int decideTrafficLight(const cv::Mat &image, int crosswalk_value); // return traffic light value of the image
 
 private:
 	cv::Mat current_frame;
 	int _trafficLightType;
+	int red_previous_pos;
+	int red_previous_value;
+	int green_previous_pos;
+	int green_previous_value;
 
 	void _findSquares( const cv::Mat& image, vector<vector<cv::Point> >& squares );
 	void _drawSquares( cv::Mat& image, const vector<vector<cv::Point> >& squares );

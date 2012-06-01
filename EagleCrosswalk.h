@@ -17,6 +17,8 @@ public:
 
 private:
 	cv::Mat current_frame;
+	int previous_pos;
+	int previous_value;
 };
 
 #endif
